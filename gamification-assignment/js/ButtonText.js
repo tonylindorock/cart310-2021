@@ -1,28 +1,31 @@
 // a button with text
 class ButtonText extends Button{
-  constructor(posX, posY, width, height, bgColor, inRect, text){
-    super(posX, posY, width, height, bgColor);
+  constructor(posX, posY, width, height, bgColor, inRect, textColor,text){
+    super(posX, posY, width, height);
 
+    this.bgColor = bgColor;
     this.inRect = inRect;
+    this.textColor = textColor;
     this.text = text;
   }
 
+// button style
   normalStyle(){
     if (this.inRect){
       fill(this.bgColor);
       rect(this.posX, this.posY, this.width, this.height, 8);
       fill(COLOR_WHITE);
     }else{
-      fill(COLOR_LINK);
+      fill(this.textColor);
     }
-    cursor(ARROW);
   }
 
+// button style when hovered
   hoverStyle(){
     this.normalStyle();
-    cursor(HAND);
   }
 
+// button style when clicked
   clickStyle(){
     if (this.inRect){
       fill(this.bgColor);
@@ -31,7 +34,7 @@ class ButtonText extends Button{
       rect(this.posX, this.posY, this.width, this.height, 8);
       fill(COLOR_WHITE);
     }else{
-      fill(COLOR_LINK);
+      fill(COLOR_ORANGE);
     }
   }
 
@@ -50,7 +53,7 @@ class ButtonText extends Button{
     }else{
       this.normalStyle();
     }
-    text(this.text, this.posX, this.posY, this.width, this.height);
+    text(this.text, this.posX, this.posY);
     pop();
   }
 }
