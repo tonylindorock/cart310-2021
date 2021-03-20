@@ -1,6 +1,6 @@
 // a button with text
 class ButtonText extends Button{
-  constructor(posX, posY, width, height, bgColor, inRect, textColor,text){
+  constructor(posX, posY, width, height, bgColor, inRect, textColor, text){
     super(posX, posY, width, height);
 
     this.bgColor = bgColor;
