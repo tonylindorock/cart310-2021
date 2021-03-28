@@ -1,17 +1,20 @@
 class ButtonNotepad extends Button{
-  constructor(x, y, bgColor, textColor, type, title){
+  constructor(x, y, bgColor, textColor, type, title, id){
     super(x, y, NOTE_THUMBNIAL_SIZE, NOTE_THUMBNIAL_SIZE);
 
     this.title = title;
+    this.id = id;
+
     this.bgColor = bgColor;
     this.textColor = textColor;
     this.type = type;
 
-    this.rotation = random(-8, 8);
+    this.RAND_ROTATE = 12;
+    this.rotation = random(-this.RAND_ROTATE, this.RAND_ROTATE);
 
     this.CORNER_RADIUS_PLAYFUL = 16;
     this.CORNER_RADIUS_PLAIN = 8;
-    this.MARGIN = 8;
+    this.MARGIN = 16;
     this.ENLARGER_RADIO = 1.05;
 
     this.offsetX = 0.0;
@@ -68,8 +71,7 @@ class ButtonNotepad extends Button{
   }
 
   checkForMouse(){
-    if (mouseX >= this.posX - this.width/2 && mouseX <= this.posX + this.width/2
-    && mouseY >= this.posY - this.height/2 && mouseY <= this.posY + this.height/2){
+    if (checkForMouseOver(this.posX, this.posY, this.width, this.height)){
       cursor(HAND);
       this.isHover = true;
 
@@ -78,8 +80,12 @@ class ButtonNotepad extends Button{
         this.mouseClicked = true;
         this.posX = mouseX - this.offsetX;
         this.posY = mouseY - this.offsetY;
+
+        updateSelectedItem("NOTE", this.id);
       }else{
         this.mouseClicked = false;
+
+        updateSelectedItem("",-1);
       }
       this.offsetX = mouseX - this.posX;
       this.offsetY = mouseY - this.posY;
@@ -92,18 +98,27 @@ class ButtonNotepad extends Button{
     }
   }
 
+  checkForDrag(){
+    if (this.mouseClicked){
+      this.posX = mouseX - this.offsetX;
+      this.posY = mouseY - this.offsetY;
+    }
+  }
+
   display(){
     this.checkForMouse();
+    this.checkForDrag();
     push();
     rectMode(CENTER);
     angleMode(DEGREES);
     noStroke();
     translate(this.posX, this.posY);
     rotate(this.rotation);
+    push();
     drawingContext.shadowOffsetX = 0;
     drawingContext.shadowOffsetY = 0;
     drawingContext.shadowBlur = 25;
-    drawingContext.shadowColor = COLOR_GREY;
+    drawingContext.shadowColor = SHADE_NOTE_SHADOW;
     if (this.isHover){
       if (this.mouseClicked){
         this.clickStyle();
@@ -113,6 +128,7 @@ class ButtonNotepad extends Button{
     }else{
       this.normalStyle();
     }
+    pop();
     textAlign(LEFT, TOP);
     textSize(16);
     text(this.title, - this.width/2 + this.MARGIN, - this.width/2 + this.MARGIN);
