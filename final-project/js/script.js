@@ -19,6 +19,8 @@ const CHAR_HEIGHT = 16;
 const MAX_NOTE_SIZE = 600;
 
 const NOTE_THUMBNIAL_SIZE = 160;
+const AWARD_SIZE = 100;
+const AWARD_ICON_SIZE = 64;
 
 const MARGIN = 32;
 const TOP_MENU_HEIGHT = 48;
@@ -46,6 +48,7 @@ let FONT_TERMINAL;
 
 let ICON_TRASH_GREY;
 let ICON_TRASH_BLACK;
+let STICKER_ONE_HUNDREN;
 
 let state = 0;
 let selectedItem = {
@@ -59,6 +62,7 @@ let trashAnim = {
 };
 
 let note;
+let sticker;
 let charGrid;
 let character;
 
@@ -68,23 +72,28 @@ function preload() {
 
   ICON_TRASH_GREY = loadImage("assets/images/icon_trash_grey.png");
   ICON_TRASH_BLACK = loadImage("assets/images/icon_trash_black.png");
+
+  STICKER_ONE_HUNDREN = loadImage("assets/images/sticker_100.png");
 }
 
 function setup() {
   createCanvas(windowWidth,windowHeight);
   noStroke();
 
-  note = new ButtonNotepad(windowWidth/2,windowHeight/2,COLOR_ORANGE,COLOR_BLACK,2, "Hello", 0);
+  note = new DraggableNotepad(windowWidth/2,windowHeight/2,COLOR_ORANGE,COLOR_BLACK,0, "Hello", 0);
+  sticker = new DraggableAward(windowWidth/2,windowHeight/2,COLOR_YELLOW,STICKER_ONE_HUNDREN, 1, 0);
+
   charGrid = new CharGrid(2, COLOR_ORANGE, COLOR_BLACK);
   charGrid.addLine("This is a note.\n\n- Item 1\n- Item 2\n- Item 3\n\n[X] Finish essay\n[ ] Rehearse presentation\n[ ] Help TONY print out his paper\n\nPresentation due FRI\nPaper due SUN");
 }
 
 function draw() {
   background(COLOR_GREY_LIGHT);
-  charGrid.display();
-  //displayMainMeun();
-  //note.display();
-  //displayTrashCan();
+  //charGrid.display();
+  displayMainMeun();
+  note.display();
+  sticker.display();
+  displayTrashCan();
 }
 
 function displayMainMeun(){

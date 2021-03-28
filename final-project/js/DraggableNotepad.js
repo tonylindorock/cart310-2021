@@ -1,41 +1,34 @@
-class ButtonNotepad extends Button{
-  constructor(x, y, bgColor, textColor, type, title, id){
-    super(x, y, NOTE_THUMBNIAL_SIZE, NOTE_THUMBNIAL_SIZE);
+class DraggableNotepad extends Draggable{
+  constructor(x, y, bgColor, textColor, theme, title, id){
+    super(x, y, NOTE_THUMBNIAL_SIZE, NOTE_THUMBNIAL_SIZE, "NOTE", id);
 
     this.title = title;
-    this.id = id;
 
     this.bgColor = bgColor;
     this.textColor = textColor;
-    this.type = type;
+    this.theme = theme;
 
-    this.font = "Trebuchet MS";
+    this.font = "Courier";
 
-    if (this.type === 0){
+    if (this.theme === 0){
       this.font = FONT_PLAYFUL;
-    }else if (this.type === 1){
+    }else if (this.theme === 1){
       this.font = FONT_TERMINAL;
     }
-
-    this.RAND_ROTATE = 12;
-    this.rotation = random(-this.RAND_ROTATE, this.RAND_ROTATE);
 
     this.CORNER_RADIUS_PLAYFUL = 16;
     this.CORNER_RADIUS_PLAIN = 8;
     this.MARGIN = 16;
     this.ENLARGER_RADIO = 1.05;
-
-    this.offsetX = 0.0;
-    this.offsetY = 0.0;
-    this.tempMouseX = 0;
-    this.tempMouseY = 0;
+    this.scale = 1;
 
     this.open = false;
   }
 
 // button style
   normalStyle(){
-    switch(this.type){
+    this.scale = 1;
+    switch(this.theme){
       case 0:
         fill(this.bgColor);
         rect(0,0, this.width, this.width, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
@@ -55,7 +48,8 @@ class ButtonNotepad extends Button{
 
 // button style when hovered
   hoverStyle(){
-    switch(this.type){
+    this.scale = this.ENLARGER_RADIO;
+    switch(this.theme){
       case 0:
         fill(this.bgColor);
         rect(0,0, this.width*this.ENLARGER_RADIO, this.width*this.ENLARGER_RADIO, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
@@ -78,42 +72,6 @@ class ButtonNotepad extends Button{
     this.normalStyle();
   }
 
-  checkForMouse(){
-    if (checkForMouseOver(this.posX, this.posY, this.width, this.height)){
-      cursor(ARROW);
-      this.isHover = true;
-
-      if (mouseIsPressed){
-        cursor('grab');
-        this.mouseClicked = true;
-        this.posX = mouseX - this.offsetX;
-        this.posY = mouseY - this.offsetY;
-
-        updateSelectedItem("NOTE", this.id);
-      }else{
-        if (this.mouseClicked){
-
-        }
-        this.mouseClicked = false;
-        updateSelectedItem("",-1);
-      }
-      this.offsetX = mouseX - this.posX;
-      this.offsetY = mouseY - this.posY;
-
-    }else{
-      if (this.isHover){
-        cursor(ARROW);
-      }
-      this.isHover = false;
-    }
-  }
-
-  checkForDrag(){
-    if (this.mouseClicked){
-      this.posX = mouseX - this.offsetX;
-      this.posY = mouseY - this.offsetY;
-    }
-  }
 
   display(){
     this.checkForMouse();
@@ -121,7 +79,6 @@ class ButtonNotepad extends Button{
     push();
     rectMode(CENTER);
     angleMode(DEGREES);
-    noStroke();
     translate(this.posX, this.posY);
     rotate(this.rotation);
     push();
@@ -142,8 +99,8 @@ class ButtonNotepad extends Button{
     fill(this.textColor);
     textFont(this.font);
     textAlign(LEFT, TOP);
-    textSize(16);
-    text(this.title, - this.width/2 + this.MARGIN, - this.width/2 + this.MARGIN);
+    textSize(18 * this.scale);
+    text(this.title, (- this.width/2 + this.MARGIN) * this.scale, (- this.width/2 + this.MARGIN) * this.scale);
     pop();
   }
 }
