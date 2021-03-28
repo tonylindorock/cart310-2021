@@ -14,8 +14,10 @@ https://webfonts.ffonts.net/04b03.font.download
 
 ******************/
 
-const CHAR_WIDTH = 32;
-const CHAR_HEIGHT = 48;
+const CHAR_WIDTH = 34;
+const CHAR_HEIGHT = 16;
+const MAX_NOTE_SIZE = 600;
+
 const NOTE_THUMBNIAL_SIZE = 160;
 
 const MARGIN = 32;
@@ -57,6 +59,8 @@ let trashAnim = {
 };
 
 let note;
+let charGrid;
+let character;
 
 function preload() {
   FONT_PLAYFUL = loadFont("assets/goldie-boxing/Goldie Boxing.ttf");
@@ -70,14 +74,17 @@ function setup() {
   createCanvas(windowWidth,windowHeight);
   noStroke();
 
-  note = new ButtonNotepad(windowWidth/2,windowHeight/2,COLOR_ORANGE,COLOR_BLACK,0, "Hello");
+  note = new ButtonNotepad(windowWidth/2,windowHeight/2,COLOR_ORANGE,COLOR_BLACK,2, "Hello", 0);
+  charGrid = new CharGrid(2, COLOR_ORANGE, COLOR_BLACK);
+  charGrid.addLine("This is a note.\n\n- Item 1\n- Item 2\n- Item 3\n\n[X] Finish essay\n[ ] Rehearse presentation\n[ ] Help TONY print out his paper\n\nPresentation due FRI\nPaper due SUN");
 }
 
 function draw() {
   background(COLOR_GREY_LIGHT);
-  displayMainMeun();
-  note.display();
-  displayTrashCan();
+  charGrid.display();
+  //displayMainMeun();
+  //note.display();
+  //displayTrashCan();
 }
 
 function displayMainMeun(){
@@ -93,6 +100,7 @@ function displayMainMeun(){
   text("Noteepadd", windowWidth/2, barHeight/2 + (MARGIN/2));
 
   let size = 48;
+  fill(0,0,0,255/2);
   if (checkForNoteDeletion()){
     trashAnim.radius = lerp(trashAnim.radius,size*8,trashAnim.speed);
     ellipse(MARGIN + size/2, windowHeight - MARGIN - size/2,trashAnim.radius);
@@ -132,4 +140,10 @@ function updateSelectedItem(type, id){
 function checkForMouseOver(x, y, w, h){
   return (mouseX >= x - w/2 && mouseX <= x + w/2
   && mouseY >= y - h/2 && mouseY <= y + h/2);
+}
+
+function doubleClicked(){
+  if (selectedItem.type === "NOTE"){
+    console.log("Open note " + selectedItem.id);
+  }
 }

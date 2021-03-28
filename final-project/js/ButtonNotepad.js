@@ -9,6 +9,14 @@ class ButtonNotepad extends Button{
     this.textColor = textColor;
     this.type = type;
 
+    this.font = "Trebuchet MS";
+
+    if (this.type === 0){
+      this.font = FONT_PLAYFUL;
+    }else if (this.type === 1){
+      this.font = FONT_TERMINAL;
+    }
+
     this.RAND_ROTATE = 12;
     this.rotation = random(-this.RAND_ROTATE, this.RAND_ROTATE);
 
@@ -21,6 +29,8 @@ class ButtonNotepad extends Button{
     this.offsetY = 0.0;
     this.tempMouseX = 0;
     this.tempMouseY = 0;
+
+    this.open = false;
   }
 
 // button style
@@ -32,7 +42,7 @@ class ButtonNotepad extends Button{
         break;
       case 1:
         stroke(COLOR_GREY_DARK);
-        strokeWeight(16);
+        strokeWeight(12);
         fill(COLOR_BLACK);
         rect(0,0, this.width, this.width);
         noStroke();
@@ -41,7 +51,6 @@ class ButtonNotepad extends Button{
         fill(this.bgColor);
         rect(0,0, this.width, this.width, this.CORNER_RADIUS_PLAIN);
     }
-    fill(this.textColor);
   }
 
 // button style when hovered
@@ -53,7 +62,7 @@ class ButtonNotepad extends Button{
         break;
       case 1:
         stroke(COLOR_GREY_DARK);
-        strokeWeight(16);
+        strokeWeight(12);
         fill(COLOR_BLACK);
         rect(0,0, this.width*this.ENLARGER_RADIO, this.width*this.ENLARGER_RADIO);
         noStroke();
@@ -62,7 +71,6 @@ class ButtonNotepad extends Button{
         fill(this.bgColor);
         rect(0,0, this.width*this.ENLARGER_RADIO, this.width*this.ENLARGER_RADIO, this.CORNER_RADIUS_PLAIN);
     }
-    fill(this.textColor);
   }
 
 // button style when clicked
@@ -72,7 +80,7 @@ class ButtonNotepad extends Button{
 
   checkForMouse(){
     if (checkForMouseOver(this.posX, this.posY, this.width, this.height)){
-      cursor(HAND);
+      cursor(ARROW);
       this.isHover = true;
 
       if (mouseIsPressed){
@@ -83,8 +91,10 @@ class ButtonNotepad extends Button{
 
         updateSelectedItem("NOTE", this.id);
       }else{
-        this.mouseClicked = false;
+        if (this.mouseClicked){
 
+        }
+        this.mouseClicked = false;
         updateSelectedItem("",-1);
       }
       this.offsetX = mouseX - this.posX;
@@ -129,6 +139,8 @@ class ButtonNotepad extends Button{
       this.normalStyle();
     }
     pop();
+    fill(this.textColor);
+    textFont(this.font);
     textAlign(LEFT, TOP);
     textSize(16);
     text(this.title, - this.width/2 + this.MARGIN, - this.width/2 + this.MARGIN);
