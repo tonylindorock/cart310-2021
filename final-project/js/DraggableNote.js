@@ -1,4 +1,4 @@
-class DraggableNotepad extends Draggable{
+class DraggableNote extends Draggable{
   constructor(x, y, bgColor, textColor, theme, title, id){
     super(x, y, NOTE_THUMBNIAL_SIZE, NOTE_THUMBNIAL_SIZE, "NOTE", id);
 

@@ -9,6 +9,13 @@ class Button{
 
     this.isHover = false;
     this.mouseClicked = false;
+
+    this.pressTime = 0;
+    this.func = null;
+  }
+
+  connectFunc(def){
+    this.func = def;
   }
 
   checkForMouse(){
@@ -19,10 +26,17 @@ class Button{
 
       if (mouseIsPressed){
         this.mouseClicked = true;
+        if (this.pressTime < 1){
+          this.pressTime += 1;
+          if (this.func != null){
+            this.func();
+          }
+        }
       }else{
+        this.pressTime = 0;
         this.mouseClicked = false;
       }
-      
+
     }else{
       if (this.isHover){
         cursor(ARROW);

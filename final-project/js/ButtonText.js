@@ -8,15 +8,15 @@ class ButtonText extends Button{
     this.textColor = textColor;
     this.text = text;
 
-    this.cornerRadius = 8;
+    this.CORNER_RADIUS = 8;
   }
 
 // button style
   normalStyle(){
     if (this.inRect){
       fill(this.bgColor);
-      rect(this.posX, this.posY, this.width, this.height, this.cornerRadius);
-      fill(COLOR_WHITE);
+      rect(this.posX, this.posY, this.width, this.height, this.CORNER_RADIUS);
+      fill(this.textColor);
     }else{
       fill(this.textColor);
     }
@@ -31,12 +31,12 @@ class ButtonText extends Button{
   clickStyle(){
     if (this.inRect){
       fill(this.bgColor);
-      rect(this.posX, this.posY, this.width, this.height, this.cornerRadius);
+      rect(this.posX, this.posY, this.width, this.height, this.CORNER_RADIUS);
       fill(255,255,255,75);
-      rect(this.posX, this.posY, this.width, this.height, this.cornerRadius);
-      fill(COLOR_WHITE);
+      rect(this.posX, this.posY, this.width, this.height, this.CORNER_RADIUS);
+      fill(this.textColor);
     }else{
-      fill(COLOR_ORANGE);
+      fill(this.textColor);
     }
   }
 
