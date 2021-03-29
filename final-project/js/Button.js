@@ -19,8 +19,7 @@ class Button{
   }
 
   checkForMouse(){
-    if (mouseX >= this.posX - this.width/2 && mouseX <= this.posX + this.width/2
-    && mouseY >= this.posY - this.height/2 && mouseY <= this.posY + this.height/2){
+    if (checkForMouseOver(this.posX, this.posY, this.width, this.height) && selectedItem.type === ""){
       cursor(HAND);
       this.isHover = true;
 
