@@ -18,6 +18,9 @@ class CharGrid{
 
     this.MAX_SIZE = 600;
 
+    this.underlineEnabled = false;
+    this.highlightEnabled = false;
+
     this.setup();
   }
 

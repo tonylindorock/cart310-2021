@@ -118,7 +118,7 @@ function setup() {
   note = new DraggableNote(windowWidth / 2, windowHeight / 2, COLOR_BLUE_PASTEL, COLOR_BLACK, 0, "Hello", 0);
   sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
 
-  charGrid = new CharGrid(2, COLOR_ORANGE, COLOR_BLACK);
+  charGrid = new CharGrid(0, COLOR_ORANGE_PASTEL, COLOR_BLACK);
   charGrid.addLine("This is a note.\n\n- Item 1\n- Item 2\n- Item 3\n\n[X] Finish essay\n[ ] Rehearse presentation\n[ ] Help TONY print out his paper\n\nPresentation due FRI\nPaper due SUN");
 
   setupMainMenuBtns();
@@ -215,7 +215,9 @@ function setupNoteEditorBtns(){
   btnClose = new ButtonIcon(64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CLOSE);
   btnShare = new ButtonIcon(128, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_SHARE);
   btnShare.connectFunc(function(){
-    charGrid.copyNote();
+    setTimeout(function(){
+      charGrid.copyNote();
+    }, 200);
     console.log("Text copied.");
   });
   btnUnderline = new ButtonIcon(windowWidth - 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE);
