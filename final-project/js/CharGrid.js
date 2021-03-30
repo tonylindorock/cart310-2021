@@ -32,11 +32,11 @@ class CharGrid{
     }
   }
 
-  addChar(character){
+  addChar(character, special = ""){
     let valid = true;
     if (this.lines[this.pointerPosY].length === CHAR_WIDTH){
       this.pointerPosX = 0;
-      if (this.lines.size != CHAR_HEIGHT){
+      if (this.lines.length != CHAR_HEIGHT){
         this.pointerPosY += 1;
         this.lines.push("");
         this.characters.push([]);
@@ -45,7 +45,7 @@ class CharGrid{
       }
     }
     if (valid){
-      let newChar = new Character(this.pointerPosX, this.pointerPosY, character);
+      let newChar = new Character(this.pointerPosX, this.pointerPosY, character, special);
       this.lines[this.pointerPosY] =  this.lines[this.pointerPosY] + character;
       this.characters[this.pointerPosY].push(newChar);
       //console.log(character + " New char added at "+ this.pointerPosX + " " + this.pointerPosY);
@@ -63,6 +63,28 @@ class CharGrid{
   addLine(line){
     for (let j = 0; j < line.length; j++) {
       this.addChar(line.charAt(j));
+    }
+  }
+
+  addCheckButton(){
+    this.addChar("[");
+    this.addChar(" ", "CHECK_BUTTON");
+    this.addChar("]");
+  }
+
+  removeChar(){
+    if (this.pointerPosX === 0){
+      if (this.pointerPosY > 0){
+        this.pointerPosY -= 1;
+      }
+      this.pointerPosX = CHAR_WIDTH;
+      this.lines.pop();
+      this.characters.pop();
+    }else{
+      this.pointerPosX -= 1;
+      let temp = this.lines[this.pointerPosY];
+      this.lines[this.pointerPosY] = temp.substring(0, temp.length - 1);
+      this.characters[this.pointerPosY].pop();
     }
   }
 
@@ -90,6 +112,19 @@ class CharGrid{
     }
   }
 
+  displayPointer(){
+    push();
+    translate(windowWidth/2-this.MAX_SIZE/2, TOP_MENU_HEIGHT/2);
+    rectMode(CORNER);
+    if (frameCount % 120 < 60){
+      fill(COLOR_WHITE);
+    }else{
+      noFill();
+    }
+    rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, 3, MAX_NOTE_SIZE/CHAR_HEIGHT);
+    pop();
+  }
+
   display(){
     push();
     translate(windowWidth/2-this.MAX_SIZE/2, TOP_MENU_HEIGHT/2);
@@ -107,5 +142,6 @@ class CharGrid{
       }
     }
     pop();
+    this.displayPointer()
   }
 }

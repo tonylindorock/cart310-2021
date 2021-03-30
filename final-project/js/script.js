@@ -31,6 +31,8 @@ const ADD_MENU_HEIGHT = 160;
 const UNI_BTN_HEIGHT = 32;
 const UNI_BTNC_HEIGHT = 192;
 
+const ALL_CHAR = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=!@#$%^&*()_+,.<>?\'\"\|/\\";
+
 // **************** COLORS ****************
 const COLOR_BLACK = "#262626";
 const COLOR_GREY_DARK = "#484848";
@@ -119,7 +121,8 @@ function setup() {
   sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
 
   charGrid = new CharGrid(0, COLOR_ORANGE_PASTEL, COLOR_BLACK);
-  charGrid.addLine("This is a note.\n\n- Item 1\n- Item 2\n- Item 3\n\n[X] Finish essay\n[ ] Rehearse presentation\n[ ] Help TONY print out his paper\n\nPresentation due FRI\nPaper due SUN");
+  charGrid.addCheckButton();
+  charGrid.addLine(" Finish essay");
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
@@ -252,5 +255,24 @@ function checkForMouseOver(x, y, w, h) {
 function doubleClicked() {
   if (selectedItem.type === "NOTE") {
     console.log("Open note " + selectedItem.id);
+  }
+}
+
+function keyPressed(){
+  // delete
+  if (keyCode === 8){
+    charGrid.removeChar();
+  }
+  // return
+  if (keyCode === 13){
+    charGrid.addChar("\n");
+  }
+
+}
+
+function keyTyped(){
+  let character = key;
+  if (ALL_CHAR.includes(key)){
+    charGrid.addChar(key);
   }
 }

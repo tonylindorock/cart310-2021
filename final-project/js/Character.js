@@ -1,9 +1,12 @@
 // character obj for display a single char
 class Character{
-  constructor(x, y, char){
+  constructor(x, y, char, special = ""){
     this.char = char;
     this.underline = false;
     this.highlight = false;
+
+    this.special = special;
+    this.button = null;
 
     this.posX = x;
     this.posY = y;
@@ -17,6 +20,25 @@ class Character{
     this.pressTime = 0;
 
     this.animationDone = true;
+
+    this.globalX = windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2;
+    this.globalY = TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2;
+
+    if (this.special === "CHECK_BUTTON"){
+      this.setupButton();
+    }
+  }
+
+  setupButton(){
+    this.button = new ButtonText(this.globalX, this.globalY, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT, COLOR_WHITE, false, COLOR_BLACK, " ");
+    var thisObject = this;
+    this.button.connectFunc(function(){
+      if (thisObject.char === " "){
+        thisObject.char = "X";
+      }else{
+        thisObject.char = " ";
+      }
+    });
   }
 
   startAnimation(){
@@ -32,6 +54,11 @@ class Character{
     push();
     translate(this.posX * MAX_NOTE_SIZE/CHAR_WIDTH, this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT);
     rectMode(CORNER);
+
+    if (this.button != null){
+      this.button.display();
+    }
+
     if (!this.animationDone){
       this.animate();
     }
