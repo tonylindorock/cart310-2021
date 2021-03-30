@@ -74,6 +74,22 @@ class CharGrid{
     alert(text);
   }
 
+  toggleUnderline(){
+    for(let i = 0; i < this.characters.length; i++){
+      for(let j = 0; j < this.characters[i].length; j++){
+        this.characters[i][j].underlineEnabled = !this.characters[i][j].underlineEnabled;
+      }
+    }
+  }
+
+  toggleHighlight(){
+    for(let i = 0; i < this.characters.length; i++){
+      for(let j = 0; j < this.characters[i].length; j++){
+        this.characters[i][j].highlightEnabled = !this.characters[i][j].highlightEnabled;
+      }
+    }
+  }
+
   display(){
     push();
     translate(windowWidth/2-this.MAX_SIZE/2, TOP_MENU_HEIGHT/2);

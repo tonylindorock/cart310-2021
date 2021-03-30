@@ -11,7 +11,10 @@ class Character{
     this.FONT_SIZE = 30;
     this.UNDERLINE_WEIGHT = 3;
 
-    this.markupEnabled = false;
+    this.underlineEnabled = false;
+    this.highlightEnabled = false;
+
+    this.pressTime = 0;
 
     this.animationDone = true;
   }
@@ -48,9 +51,25 @@ class Character{
       rect(0, MAX_NOTE_SIZE/CHAR_HEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, this.UNDERLINE_WEIGHT);
     }
 
-    if (checkForMouseOver(windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2, TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT) && this.markupEnabled){
+    if (checkForMouseOver(windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2, TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT) && (this.underlineEnabled || this.highlightEnabled)){
       fill(0,0,255,50);
       rect(-2,0, MAX_NOTE_SIZE/CHAR_WIDTH + 4, MAX_NOTE_SIZE/CHAR_HEIGHT);
+
+      if (mouseIsPressed){
+        if (this.pressTime < 1){
+          this.pressTime += 1;
+          if (this.underlineEnabled){
+            this.underline = !this.underline;
+          }
+          if (this.highlightEnabled){
+            this.highlight = !this.highlight;
+          }
+        }
+      }else{
+        this.pressTime = 0;
+      }
+    }else{
+      this.pressTime = 0;
     }
 
     fill(textColor);

@@ -1,7 +1,7 @@
 // a button with text
 class ButtonIcon extends Button{
-  constructor(posX, posY, width, height, icon){
-    super(posX, posY, width, height);
+  constructor(posX, posY, width, height, icon, toggle = false){
+    super(posX, posY, width, height, toggle);
 
     this.icon = icon;
     this.iconSize = height * 0.75;
@@ -17,12 +17,20 @@ class ButtonIcon extends Button{
 // button style when hovered
   hoverStyle(){
     fill(255,255,255,50);
-    rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
+    if (this.toggleMode && this.toggled){
+      rect(this.posX, this.posY, this.width * 1.2, this.width * 1.2, this.CORNER_RADIUS);
+    }else{
+      rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
+    }
   }
 
 // button style when clicked
   clickStyle(){
-    fill(255,255,255,75);
+    if (this.toggleMode){
+      fill(255,255,255,50);
+    }else{
+      fill(255,255,255,75);
+    }
     rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
   }
 
@@ -31,10 +39,11 @@ class ButtonIcon extends Button{
     push();
     rectMode(CENTER);
     imageMode(CENTER);
-    if (this.isHover){
-      this.hoverStyle();
+    if (this.isHover || (this.toggleMode && this.toggled)){
       if (this.mouseClicked){
         this.clickStyle();
+      }else{
+        this.hoverStyle();
       }
     }else{
       this.normalStyle();

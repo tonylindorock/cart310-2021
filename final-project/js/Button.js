@@ -1,6 +1,6 @@
 // The base class for all buttons
 class Button{
-  constructor(posX, posY, width, height){
+  constructor(posX, posY, width, height, toggle){
     this.posX = posX;
     this.posY = posY;
 
@@ -9,6 +9,8 @@ class Button{
 
     this.isHover = false;
     this.mouseClicked = false;
+    this.toggleMode = toggle;
+    this.toggled = false;
 
     this.pressTime = 0;
     this.func = null;
@@ -25,8 +27,11 @@ class Button{
 
       if (mouseIsPressed){
         this.mouseClicked = true;
+
         if (this.pressTime < 1){
           this.pressTime += 1;
+          this.toggled = !this.toggled;
+          
           if (this.func != null){
             this.func();
           }

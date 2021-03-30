@@ -220,8 +220,14 @@ function setupNoteEditorBtns(){
     }, 200);
     console.log("Text copied.");
   });
-  btnUnderline = new ButtonIcon(windowWidth - 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE);
-  btnHighlight = new ButtonIcon(windowWidth - 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT);
+  btnUnderline = new ButtonIcon(windowWidth - 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
+  btnUnderline.connectFunc(function(){
+    charGrid.toggleUnderline();
+  });
+  btnHighlight = new ButtonIcon(windowWidth - 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
+  btnHighlight.connectFunc(function(){
+    charGrid.toggleHighlight();
+  });
 }
 
 function displayNoteEditor(){
