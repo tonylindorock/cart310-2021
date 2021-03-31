@@ -21,6 +21,8 @@ class CharGrid{
     this.underlineEnabled = false;
     this.highlightEnabled = false;
 
+    this.keyIsTyped = false;
+
     this.setup();
   }
 
@@ -96,18 +98,20 @@ class CharGrid{
     alert(text);
   }
 
-  toggleUnderline(){
+  toggleUnderline(state){
+    this.underlineEnabled = state;
     for(let i = 0; i < this.characters.length; i++){
       for(let j = 0; j < this.characters[i].length; j++){
-        this.characters[i][j].underlineEnabled = !this.characters[i][j].underlineEnabled;
+        this.characters[i][j].underlineEnabled = state;
       }
     }
   }
 
-  toggleHighlight(){
+  toggleHighlight(state){
+    this.highlightEnabled = state;
     for(let i = 0; i < this.characters.length; i++){
       for(let j = 0; j < this.characters[i].length; j++){
-        this.characters[i][j].highlightEnabled = !this.characters[i][j].highlightEnabled;
+        this.characters[i][j].highlightEnabled = state;
       }
     }
   }
@@ -116,8 +120,11 @@ class CharGrid{
     push();
     translate(windowWidth/2-this.MAX_SIZE/2, TOP_MENU_HEIGHT/2);
     rectMode(CORNER);
-    if (frameCount % 120 < 60){
-      fill(COLOR_WHITE);
+    if (frameCount % 120 < 60 || this.keyIsTyped){
+      fill(this.textColor);
+      if (frameCount % 120 < 60){
+        this.keyIsTyped = false;
+      }
     }else{
       noFill();
     }

@@ -66,6 +66,7 @@ let ICON_CLOSE;
 let ICON_SHARE;
 let ICON_UNDERLINE;
 let ICON_HIGHLIGHT;
+let ICON_CHECKBOX;
 
 let STICKER_ONE_HUNDREN;
 
@@ -95,6 +96,7 @@ let btnClose;
 let btnShare;
 let btnUnderline;
 let btnHighlight;
+let btnCheckbox;
 let btnTextColor;
 let btnBgColor;
 
@@ -109,6 +111,7 @@ function preload() {
   ICON_SHARE = loadImage("assets/images/icon_share.png");
   ICON_UNDERLINE = loadImage("assets/images/icon_underline.png");
   ICON_HIGHLIGHT = loadImage("assets/images/icon_highlight.png");
+  ICON_CHECKBOX = loadImage("assets/images/icon_checklist.png");
 
   STICKER_ONE_HUNDREN = loadImage("assets/images/sticker_100.png");
 }
@@ -149,9 +152,9 @@ function setupMainMenuBtns() {
   let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
   let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
 
-  btnPlayful = new ButtonText(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT/2, ADD_MENU_HEIGHT/2, ADD_MENU_HEIGHT/2, COLOR_ORANGE_PASTEL, true, COLOR_BLACK, "PLAYFUL");
-  btnTerminal = new ButtonText(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT/2, ADD_MENU_HEIGHT/2, ADD_MENU_HEIGHT/2, COLOR_GREY_DARK, true, COLOR_WHITE, "TERMINAL");
-  btnPlain = new ButtonText(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT/2, ADD_MENU_HEIGHT/2, ADD_MENU_HEIGHT/2, COLOR_WHITE, true, COLOR_BLACK, "PLAIN");
+  btnPlayful = new ButtonText(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, COLOR_ORANGE_PASTEL, true, COLOR_BLACK, "PLAYFUL");
+  btnTerminal = new ButtonText(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, COLOR_GREY_DARK, true, COLOR_WHITE, "TERMINAL");
+  btnPlain = new ButtonText(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, COLOR_WHITE, true, COLOR_BLACK, "PLAIN");
 }
 
 function displayMainMeun() {
@@ -214,32 +217,38 @@ function checkForNoteDeletion() {
   return false;
 }
 
-function setupNoteEditorBtns(){
+function setupNoteEditorBtns() {
   btnClose = new ButtonIcon(64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CLOSE);
   btnShare = new ButtonIcon(128, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_SHARE);
-  btnShare.connectFunc(function(){
-    setTimeout(function(){
+  btnShare.connectFunc(function() {
+    setTimeout(function() {
       charGrid.copyNote();
     }, 200);
     console.log("Text copied.");
   });
-  btnUnderline = new ButtonIcon(windowWidth - 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
-  btnUnderline.connectFunc(function(){
-    charGrid.toggleUnderline();
+  btnCheckbox = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CHECKBOX, false);
+  btnUnderline = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
+  btnHighlight = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
+  btnUnderline.connectFunc(function() {
+    charGrid.toggleUnderline(!charGrid.underlineEnabled);
+    charGrid.toggleHighlight(false);
+    btnHighlight.toggled = false;
   });
-  btnHighlight = new ButtonIcon(windowWidth - 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
-  btnHighlight.connectFunc(function(){
-    charGrid.toggleHighlight();
+  btnHighlight.connectFunc(function() {
+    charGrid.toggleHighlight(!charGrid.highlightEnabled);
+    charGrid.toggleUnderline(false);
+    btnUnderline.toggled = false;
   });
 }
 
-function displayNoteEditor(){
+function displayNoteEditor() {
   background(COLOR_BLACK);
   charGrid.display();
   btnClose.display();
   btnShare.display();
   btnUnderline.display();
   btnHighlight.display();
+  btnCheckbox.display();
 }
 
 function updateSelectedItem(type, id) {
@@ -258,21 +267,24 @@ function doubleClicked() {
   }
 }
 
-function keyPressed(){
+function keyPressed() {
   // delete
-  if (keyCode === 8){
+  if (keyCode === 8) {
     charGrid.removeChar();
+    charGrid.keyIsTyped = true;
   }
   // return
-  if (keyCode === 13){
+  if (keyCode === 13) {
     charGrid.addChar("\n");
+    charGrid.keyIsTyped = true;
   }
 
 }
 
-function keyTyped(){
+function keyTyped() {
   let character = key;
-  if (ALL_CHAR.includes(key)){
+  if (ALL_CHAR.includes(key)) {
     charGrid.addChar(key);
+    charGrid.keyIsTyped = true;
   }
 }

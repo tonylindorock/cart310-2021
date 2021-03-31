@@ -1,6 +1,6 @@
 // The base class for all buttons
 class Button{
-  constructor(posX, posY, width, height, toggle){
+  constructor(posX, posY, width, height, toggle = false;){
     this.posX = posX;
     this.posY = posY;
 
@@ -31,7 +31,7 @@ class Button{
         if (this.pressTime < 1){
           this.pressTime += 1;
           this.toggled = !this.toggled;
-          
+
           if (this.func != null){
             this.func();
           }
