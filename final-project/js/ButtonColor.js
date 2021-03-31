@@ -1,42 +1,53 @@
 class ButtonColor extends Button{
-  constructor(posX, posY, width, height, colorProfile, colorIndex, icon = null){
-    super(posX, posY, width, height);
+  constructor(posX, posY, width, colorProfile, colorIndex, icon = null){
+    super(posX, posY, width, width);
 
     this.icon = icon;
-    this.iconSize = height * 0.75;
+    this.iconSize = width * 0.75;
 
     this.colorProfile = colorProfile;
     this.colorIndex = colorIndex;
-
-    this.CORNER_RADIUS = 8;
   }
 
 // button style
   normalStyle(){
+    this.drawStroke();
     fill(this.colorProfile[this.colorIndex]);
-    rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
+    ellipse(this.posX, this.posY, this.width);
   }
 
 // button style when hovered
   hoverStyle(){
     fill(255,255,255,50);
-    rect(this.posX, this.posY, this.width * 1.2, this.width * 1.2, this.CORNER_RADIUS);
+    ellipse(this.posX, this.posY, this.width * 1.4);
+    this.drawStroke();
     fill(this.colorProfile[this.colorIndex]);
-    rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
+    ellipse(this.posX, this.posY, this.width);
   }
 
 // button style when clicked
   clickStyle(){
     fill(255,255,255,75);
-    rect(this.posX, this.posY, this.width * 1.2, this.width * 1.2, this.CORNER_RADIUS);
+    ellipse(this.posX, this.posY, this.width * 1.4);
+    this.drawStroke();
     fill(this.colorProfile[this.colorIndex]);
-    rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
+    ellipse(this.posX, this.posY, this.width);
+  }
+
+  drawStroke(){
+    stroke(COLOR_WHITE);
+    if (this.icon != null){
+      strokeWeight(2);
+    }else{
+      strokeWeight(4);
+    }
   }
 
   display(){
     this.checkForMouse();
     push();
     rectMode(CENTER);
+    ellipseMode(CENTER);
     imageMode(CENTER);
     if (this.isHover){
       if (this.mouseClicked){
@@ -47,6 +58,7 @@ class ButtonColor extends Button{
     }else{
       this.normalStyle();
     }
+    noStroke();
     if (this.icon != null){
       image(this.icon, this.posX, this.posY, this.iconSize, this.iconSize);
     }

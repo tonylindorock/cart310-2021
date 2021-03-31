@@ -52,6 +52,11 @@ const COLOR_BLUE_PASTEL = "#b2cefe";
 const COLOR_PURPLE = "#af4bff";
 const COLOR_PURPLE_PASTEL = "#f2a2e8";
 
+const PEN_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE];
+const HIGHLIGHT_COLORS = [COLOR_YELLOW, COLOR_ORANGE, COLOR_GREEN, COLOR_BLUE, COLOR_PURPLE];
+const NOTE_COLORS = [COLOR_RED_PASTEL, COLOR_ORANGE_PASTEL, COLOR_YELLOW_PASTEL, COLOR_GREEN_PASTEL, COLOR_BLUE_PASTEL, COLOR_PURPLE_PASTEL];
+const TEXT_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_WHITE];
+
 const SHADE_NOTE_SHADOW = "#00000040";
 const SHADE_STICKER_SHADOW = "#00000080";
 
@@ -71,6 +76,8 @@ let ICON_SHARE;
 let ICON_UNDERLINE;
 let ICON_HIGHLIGHT;
 let ICON_CHECKBOX;
+let ICON_TEXTCOLOR;
+let ICON_BGCOLOR;
 
 let STICKER_ONE_HUNDREN;
 
@@ -86,6 +93,7 @@ let trashAnim = {
 };
 
 let showAddMenu = false;
+let editingNote = true;
 
 let note;
 let sticker;
@@ -101,7 +109,11 @@ let btnShare;
 let btnUnderline;
 let btnHighlight;
 let btnCheckbox;
+let btnMarkupColor;
+let penColorIndex = 0;
+let highlighColorIndex = 0;
 let btnTextColor;
+let textColorIndex = 0;
 let btnBgColor;
 
 function preload() {
@@ -119,7 +131,9 @@ function preload() {
   ICON_SHARE = loadImage("assets/images/icon_share.png");
   ICON_UNDERLINE = loadImage("assets/images/icon_underline.png");
   ICON_HIGHLIGHT = loadImage("assets/images/icon_highlight.png");
-  ICON_CHECKBOX = loadImage("assets/images/icon_checklist.png");
+  ICON_CHECKBOX = loadImage("assets/images/icon_checkbox.png");
+  ICON_TEXTCOLOR = loadImage("assets/images/icon_text.png");
+  ICON_BGCOLOR = loadImage("assets/images/icon_bg.png");
 
   STICKER_ONE_HUNDREN = loadImage("assets/images/sticker_100.png");
 }
@@ -141,14 +155,17 @@ function setup() {
 
 function draw() {
   background(COLOR_GREY_LIGHT);
-  //displayNoteEditor();
-  displayMainMeun();
-  //note.display();
-  //sticker.display();
-  if (showAddMenu) {
-    displayAddMenu();
+  if (editingNote){
+    displayNoteEditor();
+  }else{
+    displayMainMeun();
+    note.display();
+    sticker.display();
+    if (showAddMenu) {
+      displayAddMenu();
+    }
+    displayTrashCan();
   }
-  //displayTrashCan();
 }
 
 function setupMainMenuBtns() {
@@ -249,6 +266,12 @@ function setupNoteEditorBtns() {
   btnCheckbox = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CHECKBOX, false);
   btnUnderline = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
   btnHighlight = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
+  btnMarkupColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2 - 96, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT * 0.75, PEN_COLORS, 0);
+  btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2 - 48, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT * 0.8, TEXT_COLORS, 0, ICON_TEXTCOLOR);
+  btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT * 0.8, NOTE_COLORS, 1, ICON_BGCOLOR);
+  btnCheckbox.connectFunc(function() {
+    charGrid.addCheckButton();
+  });
   btnUnderline.connectFunc(function() {
     charGrid.toggleUnderline(!charGrid.underlineEnabled);
     charGrid.toggleHighlight(false);
@@ -269,6 +292,9 @@ function displayNoteEditor() {
   btnUnderline.display();
   btnHighlight.display();
   btnCheckbox.display();
+  btnMarkupColor.display();
+  btnTextColor.display();
+  btnBgColor.display();
 }
 
 function updateSelectedItem(type, id) {
@@ -283,28 +309,32 @@ function checkForMouseOver(x, y, w, h) {
 
 function doubleClicked() {
   if (selectedItem.type === "NOTE") {
+    editingNote = true;
     console.log("Open note " + selectedItem.id);
   }
 }
 
 function keyPressed() {
-  // delete
-  if (keyCode === 8) {
-    charGrid.removeChar();
-    charGrid.keyIsTyped = true;
+  if (editingNote){
+    // delete
+    if (keyCode === 8) {
+      charGrid.removeChar();
+      charGrid.keyIsTyped = true;
+    }
+    // return
+    if (keyCode === 13) {
+      charGrid.addChar("\n");
+      charGrid.keyIsTyped = true;
+    }
   }
-  // return
-  if (keyCode === 13) {
-    charGrid.addChar("\n");
-    charGrid.keyIsTyped = true;
-  }
-
 }
 
 function keyTyped() {
-  let character = key;
-  if (ALL_CHAR.includes(key)) {
-    charGrid.addChar(key);
-    charGrid.keyIsTyped = true;
+  if (editingNote){
+    let character = key;
+    if (ALL_CHAR.includes(key)) {
+      charGrid.addChar(key);
+      charGrid.keyIsTyped = true;
+    }
   }
 }

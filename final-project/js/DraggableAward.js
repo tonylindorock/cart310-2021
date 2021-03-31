@@ -14,7 +14,7 @@ class DraggableAward extends Draggable{
     if (this.theme === 0){
       push();
       drawingContext.shadowOffsetX = 0;
-      drawingContext.shadowOffsetY = 0;
+      drawingContext.shadowOffsetY = 4;
       drawingContext.shadowBlur = 10;
       drawingContext.shadowColor = SHADE_STICKER_SHADOW;
       stroke(255);

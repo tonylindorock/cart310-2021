@@ -69,9 +69,13 @@ class CharGrid{
   }
 
   addCheckButton(){
-    this.addChar("[");
-    this.addChar(" ", "CHECK_BUTTON");
-    this.addChar("]");
+    if (this.pointerPosX < CHAR_WIDTH - 2){
+      this.addChar("[");
+      this.addChar(" ", "CHECK_BUTTON");
+      this.addChar("]");
+    }else{
+      console.log("Cannot add checkbox.");
+    }
   }
 
   removeChar(){

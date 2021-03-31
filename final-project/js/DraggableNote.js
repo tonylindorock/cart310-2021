@@ -83,7 +83,7 @@ class DraggableNote extends Draggable{
     rotate(this.rotation);
     push();
     drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
+    drawingContext.shadowOffsetY = 4;
     drawingContext.shadowBlur = 25;
     drawingContext.shadowColor = SHADE_NOTE_SHADOW;
     if (this.isHover){
