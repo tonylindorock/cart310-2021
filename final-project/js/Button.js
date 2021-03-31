@@ -1,6 +1,6 @@
 // The base class for all buttons
 class Button{
-  constructor(posX, posY, width, height, toggle = false;){
+  constructor(posX, posY, width, height, toggle = false){
     this.posX = posX;
     this.posY = posY;
 

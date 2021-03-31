@@ -38,7 +38,7 @@ class ButtonColor extends Button{
     push();
     rectMode(CENTER);
     imageMode(CENTER);
-    if (this.isHover)){
+    if (this.isHover){
       if (this.mouseClicked){
         this.clickStyle();
       }else{

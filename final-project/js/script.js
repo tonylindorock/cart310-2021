@@ -58,6 +58,10 @@ const SHADE_STICKER_SHADOW = "#00000080";
 let FONT_PLAYFUL;
 let FONT_TERMINAL;
 
+let ICON_NOTE_PLAYFUL;
+let ICON_NOTE_TERMINAL;
+let ICON_NOTE_PLAIN;
+
 let ICON_TRASH_GREY;
 let ICON_TRASH_BLACK;
 let ICON_ADD;
@@ -104,6 +108,10 @@ function preload() {
   FONT_PLAYFUL = loadFont("assets/goldie-boxing/Goldie Boxing.ttf");
   FONT_TERMINAL = loadFont("assets/webfonts_04b03/04b03.ttf.woff");
 
+  ICON_NOTE_PLAYFUL = loadImage("assets/images/note_playful.png");
+  ICON_NOTE_TERMINAL = loadImage("assets/images/note_terminal.png");
+  ICON_NOTE_PLAIN = loadImage("assets/images/note_plain.png");
+
   ICON_TRASH_GREY = loadImage("assets/images/icon_trash_grey.png");
   ICON_TRASH_BLACK = loadImage("assets/images/icon_trash_black.png");
   ICON_ADD = loadImage("assets/images/icon_add.png");
@@ -133,8 +141,8 @@ function setup() {
 
 function draw() {
   background(COLOR_GREY_LIGHT);
-  displayNoteEditor();
-  //displayMainMeun();
+  //displayNoteEditor();
+  displayMainMeun();
   //note.display();
   //sticker.display();
   if (showAddMenu) {
@@ -151,10 +159,11 @@ function setupMainMenuBtns() {
 
   let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
   let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
+  let downSizeRatio = 1.75;
 
-  btnPlayful = new ButtonText(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, COLOR_ORANGE_PASTEL, true, COLOR_BLACK, "PLAYFUL");
-  btnTerminal = new ButtonText(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, COLOR_GREY_DARK, true, COLOR_WHITE, "TERMINAL");
-  btnPlain = new ButtonText(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, ADD_MENU_HEIGHT / 2, COLOR_WHITE, true, COLOR_BLACK, "PLAIN");
+  btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
+  btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
+  btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
 }
 
 function displayMainMeun() {
@@ -199,13 +208,24 @@ function displayTrashCan() {
 function displayAddMenu() {
   push();
   fill(COLOR_GREY);
-  rect(windowWidth - 48 - ADD_MENU_WIDTH, TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2, ADD_MENU_WIDTH, ADD_MENU_HEIGHT, 8);
+
+  let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
+  let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
+
+  rect(menuPosX, menuPosY, ADD_MENU_WIDTH, ADD_MENU_HEIGHT, 8);
+
+  fill(COLOR_WHITE);
+  textAlign(CENTER);
   textFont(FONT_PLAYFUL);
+  textSize(18);
   btnPlayful.display();
+  text("PLAYFUL", menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 + 48);
   textFont(FONT_TERMINAL);
   btnTerminal.display();
+  text("TERMINAl", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 48);
   textFont("Courier");
   btnPlain.display();
+  text("PLAIN", menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 + 48);
   pop();
 }
 
