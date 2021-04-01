@@ -11,7 +11,6 @@ class ButtonIcon extends Button{
 
 // button style
   normalStyle(){
-
   }
 
 // button style when hovered

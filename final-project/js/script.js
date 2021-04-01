@@ -5,8 +5,7 @@ Yichen Wang
 
 CART 310 Final Project
 
-This is a template. You must fill in the title,
-author, and this description to match your project!
+Noteepadd is a playful, minimalistic note/text editor.
 
 FONTS FROM:
 https://www.1001fonts.com/goldie-boxing-font.html
@@ -44,25 +43,28 @@ const COLOR_RED_PASTEL = "#fea3aa";
 const COLOR_ORANGE = "#ffaf4b";
 const COLOR_ORANGE_PASTEL = "#f8b88b";
 const COLOR_YELLOW = "#ffe600";
-const COLOR_YELLOW_PASTEL = "#faf884";
+const COLOR_YELLOW_PASTEL = "#edea8c";
 const COLOR_GREEN = "#33de7a";
-const COLOR_GREEN_PASTEL = "#baed91";
+const COLOR_GREEN_PASTEL = "#b3e38d";
 const COLOR_BLUE = "#4bafff";
-const COLOR_BLUE_PASTEL = "#b2cefe";
+const COLOR_BLUE_PASTEL = "#a6c0ed";
 const COLOR_PURPLE = "#af4bff";
-const COLOR_PURPLE_PASTEL = "#f2a2e8";
+const COLOR_PURPLE_PASTEL = "#eba0e1";
 
 const PEN_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE];
-const HIGHLIGHT_COLORS = [COLOR_YELLOW, COLOR_ORANGE, COLOR_GREEN, COLOR_BLUE, COLOR_PURPLE];
-const NOTE_COLORS = [COLOR_RED_PASTEL, COLOR_ORANGE_PASTEL, COLOR_YELLOW_PASTEL, COLOR_GREEN_PASTEL, COLOR_BLUE_PASTEL, COLOR_PURPLE_PASTEL];
-const TEXT_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_WHITE];
+const HIGHLIGHT_COLORS = ["#ffff0080", COLOR_ORANGE, "#00ff0080", "#0080ff80", "#ff00ff80"];
+const COLORS_NOTE_PLAYFUL = [COLOR_RED_PASTEL, COLOR_ORANGE_PASTEL, COLOR_YELLOW_PASTEL, COLOR_GREEN_PASTEL, COLOR_BLUE_PASTEL, COLOR_PURPLE_PASTEL, COLOR_WHITE, COLOR_GREY];
+const COLORS_THEME = [COLOR_RED, COLOR_ORANGE, COLOR_YELLOW, COLOR_GREEN, COLOR_BLUE, COLOR_PURPLE, COLOR_WHITE];
+const COLORS_NOTE_PLAIN = [COLOR_GREY_DARK, COLOR_WHITE];
 
 const SHADE_NOTE_SHADOW = "#00000040";
 const SHADE_STICKER_SHADOW = "#00000080";
+// ********************************
 
 let FONT_PLAYFUL;
 let FONT_TERMINAL;
 
+// **************** IMAGES ****************
 let ICON_NOTE_PLAYFUL;
 let ICON_NOTE_TERMINAL;
 let ICON_NOTE_PLAIN;
@@ -80,6 +82,7 @@ let ICON_TEXTCOLOR;
 let ICON_BGCOLOR;
 
 let STICKER_ONE_HUNDREN;
+// ********************************
 
 let state = 0;
 let selectedItem = {
@@ -93,7 +96,7 @@ let trashAnim = {
 };
 
 let showAddMenu = false;
-let editingNote = true;
+let editingNote = false;
 
 let note;
 let sticker;
@@ -112,10 +115,10 @@ let btnCheckbox;
 let btnMarkupColor;
 let penColorIndex = 0;
 let highlighColorIndex = 0;
-let btnTextColor;
-let textColorIndex = 0;
 let btnBgColor;
+let btnTextColor;
 
+// preload fonts and images
 function preload() {
   FONT_PLAYFUL = loadFont("assets/goldie-boxing/Goldie Boxing.ttf");
   FONT_TERMINAL = loadFont("assets/webfonts_04b03/04b03.ttf.woff");
@@ -138,6 +141,7 @@ function preload() {
   STICKER_ONE_HUNDREN = loadImage("assets/images/sticker_100.png");
 }
 
+// setup main screen
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noStroke();
@@ -168,7 +172,9 @@ function draw() {
   }
 }
 
+// setup all the main menu buttons
 function setupMainMenuBtns() {
+  // create note butotn
   btnAdd = new ButtonIcon(windowWidth - 64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_ADD);
   btnAdd.connectFunc(function() {
     showAddMenu = !showAddMenu;
@@ -177,15 +183,17 @@ function setupMainMenuBtns() {
   let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
   let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
   let downSizeRatio = 1.75;
-
+  // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
 }
 
+// display main menu
 function displayMainMeun() {
   push();
   rectMode(CORNER);
+  // Top bar
   fill(COLOR_BLACK);
   let barHeight = 84;
   rect(0, 0, windowWidth, barHeight);
@@ -196,8 +204,10 @@ function displayMainMeun() {
   text("Noteepadd", windowWidth / 2, barHeight / 2 + (MARGIN / 2));
   btnAdd.display();
 
+  // trash and delete
   let size = 48;
   fill(0, 0, 0, 255 / 2);
+  // if detect dragging note over, play ready to delete animation
   if (checkForNoteDeletion()) {
     trashAnim.radius = lerp(trashAnim.radius, size * 8, trashAnim.speed);
     ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
@@ -205,15 +215,16 @@ function displayMainMeun() {
     trashAnim.radius = lerp(trashAnim.radius, 0, trashAnim.speed);
     ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
   }
-
   pop();
 }
 
+// display trash can in main menu
 function displayTrashCan() {
   push();
   imageMode(CENTER);
   ellipseMode(CENTER);
   let size = 48;
+  // if detect dragging note over, turn trash to black
   if (checkForNoteDeletion()) {
     image(ICON_TRASH_BLACK, MARGIN + size / 2, windowHeight - MARGIN - size / 2, size, size);
   } else {
@@ -222,98 +233,144 @@ function displayTrashCan() {
   pop();
 }
 
+// display add menu
 function displayAddMenu() {
   push();
+  // window
   fill(COLOR_GREY);
-
   let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
   let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
-
   rect(menuPosX, menuPosY, ADD_MENU_WIDTH, ADD_MENU_HEIGHT, 8);
-
+  // text des and buttons
   fill(COLOR_WHITE);
   textAlign(CENTER);
   textFont(FONT_PLAYFUL);
   textSize(18);
   btnPlayful.display();
-  text("PLAYFUL", menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 + 48);
+  text("PLAYFUL", menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
   textFont(FONT_TERMINAL);
   btnTerminal.display();
-  text("TERMINAl", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 48);
+  text("TERMINAl", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
   textFont("Courier");
   btnPlain.display();
-  text("PLAIN", menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 + 48);
+  text("PLAIN", menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
   pop();
 }
 
+// check for action of dragging note near trash can icon
 function checkForNoteDeletion() {
   let size = 48;
+  // if dragging item is a note and within the radius
   if (selectedItem.type === "NOTE" && checkForMouseOver(MARGIN + size / 2, windowHeight - MARGIN - size / 2, size * 2, size * 2)) {
     return true;
   }
   return false;
 }
 
+// set up buttons in note editor
 function setupNoteEditorBtns() {
+  // top left corner
   btnClose = new ButtonIcon(64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CLOSE);
   btnShare = new ButtonIcon(128, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_SHARE);
+  // share function
   btnShare.connectFunc(function() {
     setTimeout(function() {
       charGrid.copyNote();
     }, 200);
     console.log("Text copied.");
   });
+  // bottom center left
   btnCheckbox = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CHECKBOX, false);
   btnUnderline = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
   btnHighlight = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
-  btnMarkupColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2 - 96, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT * 0.75, PEN_COLORS, 0);
-  btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2 - 48, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT * 0.8, TEXT_COLORS, 0, ICON_TEXTCOLOR);
-  btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT * 0.8, NOTE_COLORS, 1, ICON_BGCOLOR);
+  // bottom center right
+  btnMarkupColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2 - 48, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, PEN_COLORS, 0);
+  btnMarkupColor.disabled = true;
+  btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_BGCOLOR);
+  btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_TEXTCOLOR);
+  // check box function
   btnCheckbox.connectFunc(function() {
     charGrid.addCheckButton();
   });
+  // underline function
   btnUnderline.connectFunc(function() {
     charGrid.toggleUnderline(!charGrid.underlineEnabled);
     charGrid.toggleHighlight(false);
     btnHighlight.toggled = false;
+    btnMarkupColor.disabled = !charGrid.underlineEnabled;
+    btnMarkupColor.colorProfile = PEN_COLORS;
+    btnMarkupColor.colorIndex = penColorIndex;
   });
+  // highlight function
   btnHighlight.connectFunc(function() {
     charGrid.toggleHighlight(!charGrid.highlightEnabled);
     charGrid.toggleUnderline(false);
     btnUnderline.toggled = false;
+    btnMarkupColor.disabled = !charGrid.highlightEnabled;
+    btnMarkupColor.colorProfile = HIGHLIGHT_COLORS;
+    btnMarkupColor.colorIndex = highlighColorIndex;
+  });
+  btnMarkupColor.connectFunc(function(){
+    if (btnMarkupColor.colorIndex < btnMarkupColor.colorProfile.length - 1){
+      btnMarkupColor.colorIndex += 1;
+    }else{
+      btnMarkupColor.colorIndex = 0;
+    }
+    if (charGrid.underlineEnabled){
+      penColorIndex = btnMarkupColor.colorIndex;
+    }else if (charGrid.highlightEnabled){
+      highlighColorIndex = btnMarkupColor.colorIndex;
+    }
+  });
+  btnBgColor.connectFunc(function(){
+    if (btnBgColor.colorIndex < btnBgColor.colorProfile.length - 1){
+      btnBgColor.colorIndex += 1;
+    }else{
+      btnBgColor.colorIndex = 0;
+    }
+    charGrid.bgColor = btnBgColor.colorProfile[btnBgColor.colorIndex];
   });
 }
 
+// display note editor
 function displayNoteEditor() {
   background(COLOR_BLACK);
+  // text editor
   charGrid.display();
+  // buttons
   btnClose.display();
   btnShare.display();
   btnUnderline.display();
   btnHighlight.display();
   btnCheckbox.display();
   btnMarkupColor.display();
-  btnTextColor.display();
   btnBgColor.display();
 }
 
+// update dragged item
 function updateSelectedItem(type, id) {
   selectedItem.type = type;
   selectedItem.id = id;
 }
 
+// check if mouse is over within a square radius in its position
 function checkForMouseOver(x, y, w, h) {
   return (mouseX >= x - w / 2 && mouseX <= x + w / 2 &&
     mouseY >= y - h / 2 && mouseY <= y + h / 2);
 }
 
+// check for double click
 function doubleClicked() {
+  // if double click on a note, it opens note editor
   if (selectedItem.type === "NOTE") {
     editingNote = true;
+    updateSelectedItem("", -1);
+    cursor(ARROW);
     console.log("Open note " + selectedItem.id);
   }
 }
 
+// check for delete and return key
 function keyPressed() {
   if (editingNote){
     // delete
@@ -329,9 +386,9 @@ function keyPressed() {
   }
 }
 
+// check for character typed
 function keyTyped() {
   if (editingNote){
-    let character = key;
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
       charGrid.keyIsTyped = true;

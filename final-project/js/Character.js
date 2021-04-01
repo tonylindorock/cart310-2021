@@ -5,6 +5,9 @@ class Character{
     this.underline = false;
     this.highlight = false;
 
+    this.underlineColor = COLOR_BLACK;
+    this.highlightColor = COLOR_YELLOW;
+
     this.special = special;
     this.button = null;
 
@@ -50,7 +53,7 @@ class Character{
 
   }
 
-  display(bgColor, textColor, highlight){
+  display(bgColor, textColor){
     push();
     translate(this.posX * MAX_NOTE_SIZE/CHAR_WIDTH, this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT);
     rectMode(CORNER);
@@ -64,17 +67,15 @@ class Character{
     }
 
     if (this.highlight){
-      fill(255,255,0,100);
+      fill(this.highlightColor);
       rect(0,this.UNDERLINE_WEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT - this.UNDERLINE_WEIGHT);
-      fill(textColor);
     }else{
       fill(255,255,255,0);
       rect(0,0, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT);
-      fill(textColor);
     }
 
     if (this.underline){
-      fill(textColor);
+      fill(this.underlineColor);
       rect(0, MAX_NOTE_SIZE/CHAR_HEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, this.UNDERLINE_WEIGHT);
     }
 
@@ -87,9 +88,11 @@ class Character{
           this.pressTime += 1;
           if (this.underlineEnabled){
             this.underline = !this.underline;
+            this.underlineColor = PEN_COLORS[penColorIndex];
           }
           if (this.highlightEnabled){
             this.highlight = !this.highlight;
+            this.highlightColor = HIGHLIGHT_COLORS[highlighColorIndex];
           }
         }
       }else{

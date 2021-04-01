@@ -11,6 +11,7 @@ class Button{
     this.mouseClicked = false;
     this.toggleMode = toggle;
     this.toggled = false;
+    this.disabled = false;
 
     this.pressTime = 0;
     this.func = null;
@@ -21,7 +22,7 @@ class Button{
   }
 
   checkForMouse(){
-    if (checkForMouseOver(this.posX, this.posY, this.width, this.height) && selectedItem.type === ""){
+    if (checkForMouseOver(this.posX, this.posY, this.width, this.height) && selectedItem.type === "" && !this.disabled){
       cursor(HAND);
       this.isHover = true;
 

@@ -12,7 +12,7 @@ class ButtonColor extends Button{
 // button style
   normalStyle(){
     this.drawStroke();
-    fill(this.colorProfile[this.colorIndex]);
+    this.fillWithoutAlpha();
     ellipse(this.posX, this.posY, this.width);
   }
 
@@ -21,7 +21,7 @@ class ButtonColor extends Button{
     fill(255,255,255,50);
     ellipse(this.posX, this.posY, this.width * 1.4);
     this.drawStroke();
-    fill(this.colorProfile[this.colorIndex]);
+    this.fillWithoutAlpha();
     ellipse(this.posX, this.posY, this.width);
   }
 
@@ -30,8 +30,16 @@ class ButtonColor extends Button{
     fill(255,255,255,75);
     ellipse(this.posX, this.posY, this.width * 1.4);
     this.drawStroke();
-    fill(this.colorProfile[this.colorIndex]);
+    this.fillWithoutAlpha();
     ellipse(this.posX, this.posY, this.width);
+  }
+
+  fillWithoutAlpha(){
+    let color = this.colorProfile[this.colorIndex];
+    if (color.length === 9){
+      color = color.substring(0,7);
+    }
+    fill(color);
   }
 
   drawStroke(){
@@ -39,7 +47,7 @@ class ButtonColor extends Button{
     if (this.icon != null){
       strokeWeight(2);
     }else{
-      strokeWeight(4);
+      strokeWeight(3);
     }
   }
 
@@ -61,6 +69,17 @@ class ButtonColor extends Button{
     noStroke();
     if (this.icon != null){
       image(this.icon, this.posX, this.posY, this.iconSize, this.iconSize);
+    }
+    if (this.disabled){
+      push();
+      translate(this.posX, this.posY);
+      angleMode(DEGREES);
+      stroke(COLOR_BLACK);
+      strokeWeight(2.5);
+      fill(COLOR_WHITE);
+      rotate(-45);
+      rect(0,0, this.width * 1.5, 5, 32);
+      pop();
     }
     pop();
   }

@@ -31,6 +31,7 @@ class CharGrid{
       this.font = FONT_PLAYFUL;
     }else if (this.theme === 1){
       this.font = FONT_TERMINAL;
+      this.highlightColor = this.bgColor;
     }
   }
 
@@ -48,6 +49,8 @@ class CharGrid{
     }
     if (valid){
       let newChar = new Character(this.pointerPosX, this.pointerPosY, character, special);
+      newChar.underlineEnabled = this.underlineEnabled;
+      newChar.highlightEnabled = this.highlightEnabled;
       this.lines[this.pointerPosY] =  this.lines[this.pointerPosY] + character;
       this.characters[this.pointerPosY].push(newChar);
       //console.log(character + " New char added at "+ this.pointerPosX + " " + this.pointerPosY);
@@ -83,9 +86,9 @@ class CharGrid{
       if (this.pointerPosY > 0){
         this.pointerPosY -= 1;
       }
-      this.pointerPosX = CHAR_WIDTH;
       this.lines.pop();
       this.characters.pop();
+      this.pointerPosX = this.lines[this.pointerPosY].length;
     }else{
       this.pointerPosX -= 1;
       let temp = this.lines[this.pointerPosY];
