@@ -15,6 +15,7 @@ https://webfonts.ffonts.net/04b03.font.download
 
 const CHAR_WIDTH = 34;
 const CHAR_HEIGHT = 16;
+const FONT_SIZE = 30;
 const MAX_NOTE_SIZE = 600;
 
 const NOTE_THUMBNIAL_SIZE = 160;
@@ -72,6 +73,7 @@ let ICON_NOTE_PLAIN;
 let ICON_TRASH_GREY;
 let ICON_TRASH_BLACK;
 let ICON_ADD;
+let ICON_DISABLED;
 
 let ICON_CLOSE;
 let ICON_SHARE;
@@ -130,6 +132,7 @@ function preload() {
   ICON_TRASH_GREY = loadImage("assets/images/icon_trash_grey.png");
   ICON_TRASH_BLACK = loadImage("assets/images/icon_trash_black.png");
   ICON_ADD = loadImage("assets/images/icon_add.png");
+  ICON_DISABLED = loadImage("assets/images/icon_disabled.png");
   ICON_CLOSE = loadImage("assets/images/icon_close.png");
   ICON_SHARE = loadImage("assets/images/icon_share.png");
   ICON_UNDERLINE = loadImage("assets/images/icon_underline.png");
@@ -150,8 +153,6 @@ function setup() {
   sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
 
   charGrid = new CharGrid(0, COLOR_ORANGE_PASTEL, COLOR_BLACK);
-  charGrid.addCheckButton();
-  charGrid.addLine(" Finish essay");
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
@@ -179,13 +180,16 @@ function setupMainMenuBtns() {
   btnAdd.connectFunc(function() {
     showAddMenu = !showAddMenu;
   });
+  btnAdd.tooltip = "ADD A NOTE";
 
   let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
   let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
   let downSizeRatio = 1.75;
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
+  btnPlayful.disabled = true;
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
+  btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
 }
 
@@ -250,7 +254,7 @@ function displayAddMenu() {
   text("PLAYFUL", menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
   textFont(FONT_TERMINAL);
   btnTerminal.display();
-  text("TERMINAl", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
+  text("TERMINAL", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
   textFont("Courier");
   btnPlain.display();
   text("PLAIN", menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
@@ -272,6 +276,7 @@ function setupNoteEditorBtns() {
   // top left corner
   btnClose = new ButtonIcon(64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CLOSE);
   btnShare = new ButtonIcon(128, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_SHARE);
+  btnShare.tooltip = "HAVE THE NOTE READY TO COPY";
   // share function
   btnShare.connectFunc(function() {
     setTimeout(function() {
@@ -281,6 +286,7 @@ function setupNoteEditorBtns() {
   });
   // bottom center left
   btnCheckbox = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CHECKBOX, false);
+  btnCheckbox.tooltip = "ADD A CHECKBOX";
   btnUnderline = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
   btnHighlight = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
   // bottom center right

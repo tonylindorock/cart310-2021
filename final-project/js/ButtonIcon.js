@@ -33,6 +33,21 @@ class ButtonIcon extends Button{
     rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
   }
 
+  showTooltip(){
+    push();
+    fill(COLOR_WHITE);
+    textFont(FONT_PLAYFUL);
+    textSize(16);
+    textAlign(LEFT,CENTER);
+    let tipPosX = mouseX;
+    let tipPosY = mouseY + 24;
+    if (mouseX > windowWidth - textWidth(this.tooltip)){
+      tipPosX -= textWidth(this.tooltip);
+    }
+    text(this.tooltip, tipPosX, tipPosY);
+    pop();
+  }
+
   display(){
     this.checkForMouse();
     push();
@@ -48,6 +63,12 @@ class ButtonIcon extends Button{
       this.normalStyle();
     }
     image(this.icon, this.posX, this.posY, this.iconSize, this.iconSize);
+    if (this.disabled){
+      image(ICON_DISABLED, this.posX, this.posY, this.width/2, this.width/2);
+    }
+    if (this.showingTooltip){
+      this.showTooltip();
+    }
     pop();
   }
 }

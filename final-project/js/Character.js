@@ -68,7 +68,7 @@ class Character{
 
     if (this.highlight){
       fill(this.highlightColor);
-      rect(0,this.UNDERLINE_WEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT - this.UNDERLINE_WEIGHT);
+      rect(0,this.UNDERLINE_WEIGHT/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT - this.UNDERLINE_WEIGHT);
     }else{
       fill(255,255,255,0);
       rect(0,0, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT);
@@ -76,7 +76,7 @@ class Character{
 
     if (this.underline){
       fill(this.underlineColor);
-      rect(0, MAX_NOTE_SIZE/CHAR_HEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, this.UNDERLINE_WEIGHT);
+      rect(0, MAX_NOTE_SIZE/CHAR_HEIGHT - this.UNDERLINE_WEIGHT/2, MAX_NOTE_SIZE/CHAR_WIDTH, this.UNDERLINE_WEIGHT);
     }
 
     if (checkForMouseOver(windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2, TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT) && (this.underlineEnabled || this.highlightEnabled)){
@@ -104,7 +104,7 @@ class Character{
 
     fill(textColor);
     textAlign(CENTER, CENTER);
-    textSize(this.FONT_SIZE);
+    textSize(FONT_SIZE);
     text(this.char, MAX_NOTE_SIZE/CHAR_WIDTH/2, MAX_NOTE_SIZE/CHAR_HEIGHT/2);
     pop();
   }

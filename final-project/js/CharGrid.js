@@ -1,9 +1,6 @@
 // Notepad with lines
 class CharGrid{
   constructor(theme, bgColor, textColor){
-    this.CHAR_WIDTH = 24;
-    this.CHAR_HEIGHT = 16;
-
     this.theme = theme;
     this.font = "Courier";
     this.bgColor = bgColor;
@@ -85,9 +82,9 @@ class CharGrid{
     if (this.pointerPosX === 0){
       if (this.pointerPosY > 0){
         this.pointerPosY -= 1;
+        this.lines.pop();
+        this.characters.pop();
       }
-      this.lines.pop();
-      this.characters.pop();
       this.pointerPosX = this.lines[this.pointerPosY].length;
     }else{
       this.pointerPosX -= 1;
