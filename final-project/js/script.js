@@ -56,7 +56,7 @@ const PEN_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE];
 const HIGHLIGHT_COLORS = ["#ffff0080", COLOR_ORANGE, "#00ff0080", "#0080ff80", "#ff00ff80"];
 const COLORS_NOTE_PLAYFUL = [COLOR_RED_PASTEL, COLOR_ORANGE_PASTEL, COLOR_YELLOW_PASTEL, COLOR_GREEN_PASTEL, COLOR_BLUE_PASTEL, COLOR_PURPLE_PASTEL, COLOR_WHITE, COLOR_GREY];
 const COLORS_THEME = [COLOR_RED, COLOR_ORANGE, COLOR_YELLOW, COLOR_GREEN, COLOR_BLUE, COLOR_PURPLE, COLOR_WHITE];
-const COLORS_NOTE_PLAIN = [COLOR_GREY_DARK, COLOR_WHITE];
+const COLORS_NOTE_PLAIN = [COLOR_WHITE, COLOR_GREY_DARK];
 
 const SHADE_NOTE_SHADOW = "#00000040";
 const SHADE_STICKER_SHADOW = "#00000080";
@@ -92,16 +92,21 @@ let selectedItem = {
   id: -1
 };
 let trashAnim = {
-  done: false,
+  deleteDone: false,
   radius: 0,
-  speed: 0.35
+  speed: 0.35,
+  angleSpeed: 0.05,
+  angle: -90
 };
 
 let showAddMenu = false;
 let editingNote = false;
+let isShowingTooltip = false;
+let currentTooltip = "";
 
-let note;
-let sticker;
+let noteContainer = [];
+let stickerContainer = [];
+let badgeContainer = [];
 let charGrid;
 
 let btnAdd;
@@ -146,16 +151,14 @@ function preload() {
 
 // setup main screen
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight*2);
   noStroke();
-
-  note = new DraggableNote(windowWidth / 2, windowHeight / 2, COLOR_BLUE_PASTEL, COLOR_BLACK, 0, "Hello", 0);
-  sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
 
   charGrid = new CharGrid(0, COLOR_ORANGE_PASTEL, COLOR_BLACK);
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
+  setupFirstUse();
 }
 
 function draw() {
@@ -164,12 +167,14 @@ function draw() {
     displayNoteEditor();
   }else{
     displayMainMeun();
-    note.display();
-    sticker.display();
+    displayNoteThumbnails();
     if (showAddMenu) {
       displayAddMenu();
     }
     displayTrashCan();
+  }
+  if(isShowingTooltip){
+    displayTooltip();
   }
 }
 
@@ -191,84 +196,6 @@ function setupMainMenuBtns() {
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
   btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
-}
-
-// display main menu
-function displayMainMeun() {
-  push();
-  rectMode(CORNER);
-  // Top bar
-  fill(COLOR_BLACK);
-  let barHeight = 84;
-  rect(0, 0, windowWidth, barHeight);
-  textFont(FONT_PLAYFUL);
-  textAlign(CENTER);
-  textSize(64);
-  fill(COLOR_WHITE);
-  text("Noteepadd", windowWidth / 2, barHeight / 2 + (MARGIN / 2));
-  btnAdd.display();
-
-  // trash and delete
-  let size = 48;
-  fill(0, 0, 0, 255 / 2);
-  // if detect dragging note over, play ready to delete animation
-  if (checkForNoteDeletion()) {
-    trashAnim.radius = lerp(trashAnim.radius, size * 8, trashAnim.speed);
-    ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
-  } else {
-    trashAnim.radius = lerp(trashAnim.radius, 0, trashAnim.speed);
-    ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
-  }
-  pop();
-}
-
-// display trash can in main menu
-function displayTrashCan() {
-  push();
-  imageMode(CENTER);
-  ellipseMode(CENTER);
-  let size = 48;
-  // if detect dragging note over, turn trash to black
-  if (checkForNoteDeletion()) {
-    image(ICON_TRASH_BLACK, MARGIN + size / 2, windowHeight - MARGIN - size / 2, size, size);
-  } else {
-    image(ICON_TRASH_GREY, MARGIN + size / 2, windowHeight - MARGIN - size / 2, size, size);
-  }
-  pop();
-}
-
-// display add menu
-function displayAddMenu() {
-  push();
-  // window
-  fill(COLOR_GREY);
-  let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
-  let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
-  rect(menuPosX, menuPosY, ADD_MENU_WIDTH, ADD_MENU_HEIGHT, 8);
-  // text des and buttons
-  fill(COLOR_WHITE);
-  textAlign(CENTER);
-  textFont(FONT_PLAYFUL);
-  textSize(18);
-  btnPlayful.display();
-  text("PLAYFUL", menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
-  textFont(FONT_TERMINAL);
-  btnTerminal.display();
-  text("TERMINAL", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
-  textFont("Courier");
-  btnPlain.display();
-  text("PLAIN", menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
-  pop();
-}
-
-// check for action of dragging note near trash can icon
-function checkForNoteDeletion() {
-  let size = 48;
-  // if dragging item is a note and within the radius
-  if (selectedItem.type === "NOTE" && checkForMouseOver(MARGIN + size / 2, windowHeight - MARGIN - size / 2, size * 2, size * 2)) {
-    return true;
-  }
-  return false;
 }
 
 // set up buttons in note editor
@@ -338,6 +265,110 @@ function setupNoteEditorBtns() {
   });
 }
 
+function setupFirstUse(){
+  let titles = ["Double click to open a sticky note", "Drag the note near the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and rewards"];
+  for(let i = 0; i < titles.length; i++){
+    let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
+    let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
+    let note;
+    if(i === 2){
+      note = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, 2, titles[i], i);
+    }else if (i === 3){
+      note = new DraggableNote(rX, rY, COLOR_BLACK, random(COLORS_THEME), 1, titles[i], i);
+    }else{
+      note = new DraggableNote(rX, rY, random(COLORS_NOTE_PLAYFUL), COLOR_BLACK, 0, titles[i], i);
+    }
+    noteContainer.push(note);
+  }
+  let sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
+}
+
+function displayNoteThumbnails(){
+  for(let i = 0; i < noteContainer.length; i++){
+    noteContainer[i].display();
+  }
+}
+
+// display main menu
+function displayMainMeun() {
+  push();
+  rectMode(CORNER);
+  // Top bar
+  fill(COLOR_BLACK);
+  rect(0, 0, windowWidth, TOP_MENU_HEIGHT);
+  textFont(FONT_PLAYFUL);
+  textAlign(CENTER);
+  textSize(64);
+  fill(COLOR_WHITE);
+  text("Noteepadd", windowWidth / 2, TOP_MENU_HEIGHT / 2 + (MARGIN / 2));
+  btnAdd.display();
+
+  // trash and delete
+  let size = 48;
+  fill(0, 0, 0, 255 / 2);
+  // if detect dragging note over, play ready to delete animation
+  if (checkForNoteDeletion()) {
+    trashAnim.radius = lerp(trashAnim.radius, size * 8, trashAnim.speed);
+    ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
+  } else {
+    trashAnim.radius = lerp(trashAnim.radius, 0, trashAnim.speed);
+    ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
+  }
+  pop();
+}
+
+// display trash can in main menu
+function displayTrashCan() {
+  push();
+  imageMode(CENTER);
+  ellipseMode(CENTER);
+  let size = 48;
+  // if detect dragging note over, turn trash to black
+  if (checkForNoteDeletion()) {
+    image(ICON_TRASH_BLACK, MARGIN + size / 2, windowHeight - MARGIN - size / 2, size, size);
+    trashAnim.angle = lerp(trashAnim.angle, 270, trashAnim.angleSpeed);
+    let radius = 32;
+    stroke(COLOR_WHITE);
+    strokeWeight(4);
+    fill(COLOR_WHITE);
+    ellipse(mouseX + radius/2, mouseY - radius/2, radius);
+    fill(COLOR_BLACK);
+    arc(mouseX + radius/2, mouseY - radius/2, radius, radius, -90, trashAnim.angle);
+    if (trashAnim.angle >= 269 && !trashAnim.deleteDone){
+      deleteNote(selectedItem.id);
+    }
+  } else {
+    trashAnim.angle = -90;
+    trashAnim.deleteDone = false;
+    image(ICON_TRASH_GREY, MARGIN + size / 2, windowHeight - MARGIN - size / 2, size, size);
+  }
+  pop();
+}
+
+// display add menu
+function displayAddMenu() {
+  push();
+  // window
+  fill(COLOR_GREY);
+  let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
+  let menuPosY = TOP_MENU_HEIGHT / 2 + UNI_BTN_HEIGHT / 2;
+  rect(menuPosX, menuPosY, ADD_MENU_WIDTH, ADD_MENU_HEIGHT, 8);
+  // text des and buttons
+  fill(COLOR_WHITE);
+  textAlign(CENTER);
+  textFont(FONT_PLAYFUL);
+  textSize(18);
+  btnPlayful.display();
+  text("PLAYFUL", menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
+  textFont(FONT_TERMINAL);
+  btnTerminal.display();
+  text("TERMINAL", menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
+  textFont("Courier");
+  btnPlain.display();
+  text("PLAIN", menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 + 52);
+  pop();
+}
+
 // display note editor
 function displayNoteEditor() {
   background(COLOR_BLACK);
@@ -357,6 +388,51 @@ function displayNoteEditor() {
 function updateSelectedItem(type, id) {
   selectedItem.type = type;
   selectedItem.id = id;
+}
+
+function displayTooltip(){
+  push();
+  fill(COLOR_WHITE);
+  textFont(FONT_PLAYFUL);
+  textSize(16);
+  textAlign(LEFT,CENTER);
+  let tipPosX = mouseX;
+  let tipPosY = mouseY + 24;
+  if (mouseX > windowWidth - textWidth(currentTooltip)){
+    tipPosX -= textWidth(currentTooltip);
+  }
+  text(currentTooltip, tipPosX, tipPosY);
+  pop();
+}
+
+function showTooltip(text){
+  currentTooltip = text;
+  isShowingTooltip = true;
+}
+
+// check for action of dragging note near trash can icon
+function checkForNoteDeletion() {
+  let size = 48;
+  // if dragging item is a note and within the radius
+  if (selectedItem.type === "NOTE" && checkForMouseOver(MARGIN + size / 2, windowHeight - MARGIN - size / 2, size * 2, size * 2)) {
+    return true;
+  }
+  return false;
+}
+
+function deleteNote(id){
+  cursor(ARROW);
+  updateSelectedItem("", -1);
+  for(let i = 0; i < noteContainer.length; i++){
+    if (noteContainer[i].id === id){
+      let tempLast = noteContainer[noteContainer.length - 1];
+      noteContainer[noteContainer.length - 1] = noteContainer[i];
+      noteContainer[i] = tempLast;
+      console.log("\"" + noteContainer.pop().title + "\" is deleted.");
+
+    }
+  }
+  trashAnim.deleteDone = true;
 }
 
 // check if mouse is over within a square radius in its position

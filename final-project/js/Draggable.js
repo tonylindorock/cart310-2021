@@ -9,7 +9,7 @@ class Draggable{
     this.type = type;
     this.id = id;
 
-    this.isHover = false;
+    this.isHovered = false;
     this.mouseClicked = false;
 
     this.RAND_ROTATE = 12;
@@ -21,7 +21,7 @@ class Draggable{
   checkForMouse(){
     if (checkForMouseOver(this.posX, this.posY, this.width, this.height)){
       cursor(ARROW);
-      this.isHover = true;
+      this.isHovered = true;
 
       if (mouseIsPressed){
         cursor('grab');
@@ -43,10 +43,10 @@ class Draggable{
       this.offsetY = mouseY - this.posY;
 
     }else{
-      if (this.isHover){
+      if (this.isHovered){
         cursor(ARROW);
       }
-      this.isHover = false;
+      this.isHovered = false;
     }
   }
 

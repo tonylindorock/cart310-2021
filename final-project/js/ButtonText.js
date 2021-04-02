@@ -47,7 +47,7 @@ class ButtonText extends Button{
     noStroke();
     textAlign(CENTER,CENTER);
     textSize(16);
-    if (this.isHover){
+    if (this.isHovered){
       this.hoverStyle();
       if (this.mouseClicked){
         this.clickStyle();

@@ -33,27 +33,12 @@ class ButtonIcon extends Button{
     rect(this.posX, this.posY, this.width, this.width, this.CORNER_RADIUS);
   }
 
-  showTooltip(){
-    push();
-    fill(COLOR_WHITE);
-    textFont(FONT_PLAYFUL);
-    textSize(16);
-    textAlign(LEFT,CENTER);
-    let tipPosX = mouseX;
-    let tipPosY = mouseY + 24;
-    if (mouseX > windowWidth - textWidth(this.tooltip)){
-      tipPosX -= textWidth(this.tooltip);
-    }
-    text(this.tooltip, tipPosX, tipPosY);
-    pop();
-  }
-
   display(){
     this.checkForMouse();
     push();
     rectMode(CENTER);
     imageMode(CENTER);
-    if (this.isHover || (this.toggleMode && this.toggled)){
+    if (this.isHovered || (this.toggleMode && this.toggled)){
       if (this.mouseClicked){
         this.clickStyle();
       }else{

@@ -86,7 +86,7 @@ class DraggableNote extends Draggable{
     drawingContext.shadowOffsetY = 4;
     drawingContext.shadowBlur = 25;
     drawingContext.shadowColor = SHADE_NOTE_SHADOW;
-    if (this.isHover){
+    if (this.isHovered){
       if (this.mouseClicked){
         this.clickStyle();
       }else{
@@ -96,11 +96,13 @@ class DraggableNote extends Draggable{
       this.normalStyle();
     }
     pop();
-    fill(this.textColor);
+    rectMode(CORNER);
     textFont(this.font);
     textAlign(LEFT, TOP);
-    textSize(18 * this.scale);
-    text(this.title, (- this.width/2 + this.MARGIN) * this.scale, (- this.width/2 + this.MARGIN) * this.scale);
+    textSize(16 * this.scale);
+    //rect((-this.width/2 + this.MARGIN) * this.scale, (-this.width/2 + this.MARGIN) * this.scale, (this.width - this.MARGIN*2)* this.scale, (this.width - this.MARGIN*2)* this.scale);
+    fill(this.textColor);
+    text(this.title, (-this.width/2 + this.MARGIN) * this.scale, (-this.width/2 + this.MARGIN) * this.scale, (this.width - this.MARGIN*2)* this.scale, (this.width - this.MARGIN*2)* this.scale);
     pop();
   }
 }

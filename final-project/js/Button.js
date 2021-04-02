@@ -7,7 +7,7 @@ class Button{
     this.width = width;
     this.height = height;
 
-    this.isHover = false;
+    this.isHovered = false;
     this.mouseClicked = false;
     this.toggleMode = toggle;
     this.toggled = false;
@@ -17,7 +17,6 @@ class Button{
     this.func = null;
 
     this.tooltip = "";
-    this.showingTooltip = false;
     this.hoverTimeout = null;
   }
 
@@ -25,17 +24,15 @@ class Button{
     this.func = def;
   }
 
-  showTooltip(){}
-
   checkForMouse(){
     if (checkForMouseOver(this.posX, this.posY, this.width, this.height) && selectedItem.type === "" && !this.disabled){
       cursor(HAND);
-      this.isHover = true;
+      this.isHovered = true;
 
       if (this.hoverTimeout === null){
         var thisObject = this;
         this.hoverTimeout = setTimeout(function(){
-          thisObject.showingTooltip = true;
+          showTooltip(thisObject.tooltip);
           //console.log("Showing tooltip");
         }, 2000);
       }
@@ -57,13 +54,13 @@ class Button{
       }
 
     }else{
-      if (this.isHover){
+      if (this.isHovered){
         cursor(ARROW);
         clearTimeout(this.hoverTimeout);
-        this.hoverTimeout = null
-        this.showingTooltip = false;
+        this.hoverTimeout = null;
+        isShowingTooltip = false;
       }
-      this.isHover = false;
+      this.isHovered = false;
     }
   }
 

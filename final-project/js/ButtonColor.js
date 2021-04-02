@@ -57,7 +57,7 @@ class ButtonColor extends Button{
     rectMode(CENTER);
     ellipseMode(CENTER);
     imageMode(CENTER);
-    if (this.isHover){
+    if (this.isHovered){
       if (this.mouseClicked){
         this.clickStyle();
       }else{

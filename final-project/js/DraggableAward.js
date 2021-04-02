@@ -72,7 +72,7 @@ class DraggableAward extends Draggable{
     translate(this.posX, this.posY);
     rotate(this.rotation);
     fill(this.bgColor);
-    if (this.isHover){
+    if (this.isHovered){
       if (this.mouseClicked){
         this.clickStyle();
       }else{
