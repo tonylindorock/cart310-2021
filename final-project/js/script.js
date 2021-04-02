@@ -54,7 +54,7 @@ const COLOR_PURPLE = "#c073ff";
 const COLOR_PURPLE_PASTEL = "#eba0e1";
 
 const PEN_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE];
-const HIGHLIGHT_COLORS = ["#ffff0080", COLOR_ORANGE, "#00ff0080", "#0080ff80", "#ff00ff80"];
+const HIGHLIGHT_COLORS = ["#ffff0080", "#ff800080", "#00ff0080", "#0080ff80", "#ff00ff80"];
 const COLORS_NOTE_PLAYFUL = [COLOR_RED_PASTEL, COLOR_ORANGE_PASTEL, COLOR_YELLOW_PASTEL, COLOR_GREEN_PASTEL, COLOR_BLUE_PASTEL, COLOR_PURPLE_PASTEL, COLOR_WHITE, COLOR_GREY];
 const COLORS_THEME = [COLOR_RED, COLOR_ORANGE, COLOR_YELLOW, COLOR_GREEN, COLOR_BLUE, COLOR_PURPLE, COLOR_WHITE];
 const COLORS_NOTE_PLAIN = [COLOR_WHITE, COLOR_GREY_DARK];
@@ -98,7 +98,7 @@ let trashAnim = {
   deleteDone: false,
   radius: 0,
   speed: 0.35,
-  angleSpeed: 0.07,
+  angleSpeed: 0.1,
   angle: -90
 };
 
@@ -213,13 +213,6 @@ function setupNoteEditorBtns() {
   btnClose = new ButtonIcon(64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CLOSE);
   btnShare = new ButtonIcon(128, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_SHARE);
   btnShare.tooltip = "HAVE THE NOTE READY TO COPY";
-  // share function
-  btnShare.connectFunc(function() {
-    setTimeout(function() {
-      charGrid.copyNote();
-    }, 200);
-    console.log("Text copied.");
-  });
   // bottom center left
   btnCheckbox = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CHECKBOX, false);
   btnCheckbox.tooltip = "ADD A CHECKBOX";
@@ -230,6 +223,23 @@ function setupNoteEditorBtns() {
   btnMarkupColor.disabled = true;
   btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_BGCOLOR);
   btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_TEXTCOLOR);
+
+  connectEditorBtns();
+}
+
+function connectEditorBtns(){
+  // close note
+  btnClose.connectFunc(function(){
+    editingNote = false;
+    updateNoteThumbnail();
+  });
+  // share function
+  btnShare.connectFunc(function() {
+    setTimeout(function() {
+      charGrid.copyNote();
+    }, 200);
+    console.log("Text copied.");
+  });
   // check box function
   btnCheckbox.connectFunc(function() {
     charGrid.addCheckButton();
@@ -271,6 +281,23 @@ function setupNoteEditorBtns() {
       btnBgColor.colorIndex = 0;
     }
     charGrid.bgColor = btnBgColor.colorProfile[btnBgColor.colorIndex];
+    if (charGrid.theme === 2) {
+      if (btnTextColor.colorIndex < btnTextColor.colorProfile.length - 1) {
+        btnTextColor.colorIndex += 1;
+      } else {
+        btnTextColor.colorIndex = 0;
+      }
+      charGrid.textColor = btnTextColor.colorProfile[btnTextColor.colorIndex];
+    }
+  });
+
+  btnTextColor.connectFunc(function() {
+    if (btnTextColor.colorIndex < btnTextColor.colorProfile.length - 1) {
+      btnTextColor.colorIndex += 1;
+    } else {
+      btnTextColor.colorIndex = 0;
+    }
+    charGrid.textColor = btnTextColor.colorProfile[btnTextColor.colorIndex];
   });
 }
 
@@ -330,6 +357,11 @@ function displayMainMeun() {
   } else {
     trashAnim.radius = lerp(trashAnim.radius, 0, trashAnim.speed);
     ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
+  }
+  if(noteContainer.length === 0){
+    textSize(32);
+    fill(COLOR_WHITE);
+    text("Add a note and start typing!", windowWidth / 2, windowHeight/2);
   }
   pop();
 }
@@ -397,8 +429,19 @@ function displayNoteEditor() {
   btnUnderline.display();
   btnHighlight.display();
   btnCheckbox.display();
-  btnMarkupColor.display();
-  btnBgColor.display();
+  switch (charGrid.theme) {
+    case 0:
+      btnMarkupColor.display();
+      btnBgColor.display();
+      break;
+    case 1:
+      btnTextColor.display();
+      break;
+    case 2:
+      btnMarkupColor.display();
+      btnBgColor.display();
+  }
+
 }
 
 // update dragged item
@@ -450,8 +493,8 @@ function checkForNoteDeletion() {
 function deleteNote(id) {
   cursor(ARROW);
   updateSelectedItem("", -1);
-  removeFromArrayByItemIndex(noteContainer, id);
-  removeFromArrayByItemIndex(noteThumbnailContainer, id)
+  removeFromArrayByItemId(noteContainer, id);
+  console.log("\""+removeFromArrayByItemId(noteThumbnailContainer, id).title+"\" is deleted.");
   trashAnim.deleteDone = true;
   hoveredDraggables = [];
 }
@@ -489,8 +532,35 @@ function openNote(id) {
       charGrid = noteContainer[i];
     }
   }
+  // update buttons for different themes
+  switch (charGrid.theme) {
+    case 0:
+      btnBgColor.colorProfile = COLORS_NOTE_PLAYFUL;
+      btnBgColor.colorIndex = COLORS_NOTE_PLAYFUL.indexOf(charGrid.bgColor);
+      break;
+    case 1:
+      btnTextColor.posX = windowWidth / 2 + MAX_NOTE_SIZE / 2;
+      btnTextColor.colorProfile = COLORS_THEME;
+      btnTextColor.colorIndex = COLORS_THEME.indexOf(charGrid.textColor);
+      break;
+    case 2:
+      btnBgColor.colorProfile = COLORS_NOTE_PLAIN;
+      btnBgColor.colorIndex = COLORS_NOTE_PLAIN.indexOf(charGrid.bgColor);
+      btnTextColor.colorProfile = COLORS_NOTE_PLAIN;
+      btnTextColor.colorIndex = COLORS_NOTE_PLAIN.indexOf(charGrid.textColor);
+  }
   editingNote = true;
   resizeCanvas(windowWidth, windowHeight);
+}
+
+function updateNoteThumbnail(){
+  for (let i = 0; i < noteThumbnailContainer.length; i++) {
+    if (charGrid.id === noteThumbnailContainer[i].id) {
+      noteThumbnailContainer[i].bgColor = charGrid.bgColor;
+      noteThumbnailContainer[i].textColor = charGrid.textColor;
+      noteThumbnailContainer[i].title = charGrid.getFirstLine();
+    }
+  }
 }
 
 // check if mouse is over within a square radius in its position
@@ -505,7 +575,13 @@ function doubleClicked() {
   if (selectedItem.type === "NOTE") {
     openNote(selectedItem.id);
     console.log("Open note " + selectedItem.id);
+    for(let i = 0; i < noteThumbnailContainer.length; i ++){
+      if (noteThumbnailContainer[i].id === selectedItem.id){
+        noteThumbnailContainer[i].forget();
+      }
+    }
     updateSelectedItem("", -1);
+    hoveredDraggables = [];
     cursor(ARROW);
   }
 }
@@ -536,49 +612,47 @@ function keyTyped() {
   }
 }
 
-function removeFromArray(array, obj){
+function removeFromArray(array, obj) {
   for (let i = 0; i < array.length; i++) {
     if (array[i] === obj) {
       let tempLast = array[array.length - 1];
       array[array.length - 1] = array[i];
       array[i] = tempLast;
-      array.pop();
-      return true
+      return array.pop();
     }
   }
-  return false;
+  return null;
 }
 
-function removeFromArrayByItemIndex(array, id){
+function removeFromArrayByItemId(array, id) {
   for (let i = 0; i < array.length; i++) {
     if (array[i].id === id) {
       let tempLast = array[array.length - 1];
       array[array.length - 1] = array[i];
       array[i] = tempLast;
-      array.pop();
-      return true
+      return array.pop();
     }
   }
-  return false;
+  return null;
 }
 
-function getItemId(){
-  return currentItemIndex ++;
+function getItemId() {
+  return currentItemIndex++;
 }
 
-function findTopItem(){
+function findTopItem() {
   let top = hoveredDraggables[0];
-  for(let i = 1; i < hoveredDraggables.length; i++){
-    if(top.type === "NOTE"){
-      if (hoveredDraggables[i].type === "AWARD"){
+  for (let i = 1; i < hoveredDraggables.length; i++) {
+    if (top.type === "NOTE") {
+      if (hoveredDraggables[i].type === "AWARD") {
         top = hoveredDraggables[i];
-      }else{
-        if (top.id < hoveredDraggables[i].id){
+      } else {
+        if (top.id < hoveredDraggables[i].id) {
           top = hoveredDraggables[i];
         }
       }
-    }else{
-      if (top.id < hoveredDraggables[i].id){
+    } else {
+      if (top.id < hoveredDraggables[i].id) {
         top = hoveredDraggables[i];
       }
     }

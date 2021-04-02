@@ -35,6 +35,10 @@ class CharGrid{
     }
   }
 
+  getFirstLine(){
+    return (this.lines[1] === undefined ? this.lines[0] : this.lines[0].replace("\n", " ") + this.lines[1]);
+  }
+
   addChar(character, special = ""){
     let valid = true;
     if (this.pointerPosX === CHAR_WIDTH){
@@ -140,7 +144,7 @@ class CharGrid{
     if (this.theme != 1){
       rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, 3, MAX_NOTE_SIZE/CHAR_HEIGHT);
     }else{
-      rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT);
+      rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH * 0.8, MAX_NOTE_SIZE/CHAR_HEIGHT);
     }
     pop();
   }

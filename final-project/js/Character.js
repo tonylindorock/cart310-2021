@@ -80,7 +80,11 @@ class Character{
     }
 
     if (checkForMouseOver(windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2, TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT) && (this.underlineEnabled || this.highlightEnabled)){
-      fill(0,100,255,50);
+      if (charGrid.theme === 1){
+        fill(textColor);
+      }else{
+        fill(0,100,255,50);
+      }
       rect(-2,0, MAX_NOTE_SIZE/CHAR_WIDTH + 4, MAX_NOTE_SIZE/CHAR_HEIGHT);
 
       if (mouseIsPressed){

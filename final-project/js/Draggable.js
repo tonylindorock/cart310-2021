@@ -54,6 +54,11 @@ class Draggable{
     }
   }
 
+  forget(){
+    this.isHovered = false;
+    this.mouseClicked = false;
+  }
+
   checkForDrag(){
     if (this.mouseClicked){
       this.posX = mouseX - this.offsetX;
