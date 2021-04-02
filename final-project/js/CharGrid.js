@@ -37,7 +37,7 @@ class CharGrid{
     let valid = true;
     if (this.lines[this.pointerPosY].length === CHAR_WIDTH){
       this.pointerPosX = 0;
-      if (this.lines.length != CHAR_HEIGHT){
+      if (this.lines.length < CHAR_HEIGHT){
         this.pointerPosY += 1;
         this.lines.push("");
         this.characters.push([]);

@@ -17,6 +17,7 @@ const CHAR_WIDTH = 34;
 const CHAR_HEIGHT = 16;
 const FONT_SIZE = 30;
 const MAX_NOTE_SIZE = 600;
+const MAX_NOTE_NUM = 16;
 
 const NOTE_THUMBNIAL_SIZE = 160;
 const AWARD_SIZE = 100;
@@ -49,7 +50,7 @@ const COLOR_GREEN = "#33de7a";
 const COLOR_GREEN_PASTEL = "#b3e38d";
 const COLOR_BLUE = "#4bafff";
 const COLOR_BLUE_PASTEL = "#a6c0ed";
-const COLOR_PURPLE = "#af4bff";
+const COLOR_PURPLE = "#c073ff";
 const COLOR_PURPLE_PASTEL = "#eba0e1";
 
 const PEN_COLORS = [COLOR_BLACK, COLOR_RED, COLOR_BLUE];
@@ -86,6 +87,8 @@ let ICON_BGCOLOR;
 let STICKER_ONE_HUNDREN;
 // ********************************
 
+let currentItemIndex = 0;
+
 let state = 0;
 let selectedItem = {
   type: "",
@@ -95,7 +98,7 @@ let trashAnim = {
   deleteDone: false,
   radius: 0,
   speed: 0.35,
-  angleSpeed: 0.05,
+  angleSpeed: 0.07,
   angle: -90
 };
 
@@ -107,6 +110,8 @@ let currentTooltip = "";
 let noteThumbnailContainer = [];
 let stickerContainer = [];
 let badgeContainer = [];
+
+let hoveredDraggables = [];
 
 let noteContainer = [];
 
@@ -154,7 +159,7 @@ function preload() {
 
 // setup main screen
 function setup() {
-  createCanvas(windowWidth, windowHeight*2);
+  createCanvas(windowWidth, windowHeight * 2);
   noStroke();
 
   setupMainMenuBtns();
@@ -164,9 +169,9 @@ function setup() {
 
 function draw() {
   background(COLOR_GREY_LIGHT);
-  if (editingNote){
+  if (editingNote) {
     displayNoteEditor();
-  }else{
+  } else {
     displayMainMeun();
     displayNoteThumbnails();
     if (showAddMenu) {
@@ -174,7 +179,7 @@ function draw() {
     }
     displayTrashCan();
   }
-  if(isShowingTooltip){
+  if (isShowingTooltip) {
     displayTooltip();
   }
 }
@@ -197,7 +202,7 @@ function setupMainMenuBtns() {
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
   btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
-  btnPlain.connectFunc(function(){
+  btnPlain.connectFunc(function() {
     createNote(2);
   });
 }
@@ -221,10 +226,10 @@ function setupNoteEditorBtns() {
   btnUnderline = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
   btnHighlight = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
   // bottom center right
-  btnMarkupColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2 - 48, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, PEN_COLORS, 0);
+  btnMarkupColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2 - 48, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, PEN_COLORS, 0);
   btnMarkupColor.disabled = true;
-  btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_BGCOLOR);
-  btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE/2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_TEXTCOLOR);
+  btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_BGCOLOR);
+  btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_TEXTCOLOR);
   // check box function
   btnCheckbox.connectFunc(function() {
     charGrid.addCheckButton();
@@ -247,45 +252,46 @@ function setupNoteEditorBtns() {
     btnMarkupColor.colorProfile = HIGHLIGHT_COLORS;
     btnMarkupColor.colorIndex = highlighColorIndex;
   });
-  btnMarkupColor.connectFunc(function(){
-    if (btnMarkupColor.colorIndex < btnMarkupColor.colorProfile.length - 1){
+  btnMarkupColor.connectFunc(function() {
+    if (btnMarkupColor.colorIndex < btnMarkupColor.colorProfile.length - 1) {
       btnMarkupColor.colorIndex += 1;
-    }else{
+    } else {
       btnMarkupColor.colorIndex = 0;
     }
-    if (charGrid.underlineEnabled){
+    if (charGrid.underlineEnabled) {
       penColorIndex = btnMarkupColor.colorIndex;
-    }else if (charGrid.highlightEnabled){
+    } else if (charGrid.highlightEnabled) {
       highlighColorIndex = btnMarkupColor.colorIndex;
     }
   });
-  btnBgColor.connectFunc(function(){
-    if (btnBgColor.colorIndex < btnBgColor.colorProfile.length - 1){
+  btnBgColor.connectFunc(function() {
+    if (btnBgColor.colorIndex < btnBgColor.colorProfile.length - 1) {
       btnBgColor.colorIndex += 1;
-    }else{
+    } else {
       btnBgColor.colorIndex = 0;
     }
     charGrid.bgColor = btnBgColor.colorProfile[btnBgColor.colorIndex];
   });
 }
 
-function setupFirstUse(){
+function setupFirstUse() {
   let titles = ["Double click to open a sticky note", "Drag the note near the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and rewards"];
-  for(let i = 0; i < titles.length; i++){
+  for (let i = 0; i < titles.length; i++) {
+    let id = getItemId();
     let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
     let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
     let noteThumbnail, note;
-    if(i === 2){
-      noteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, 2, titles[i], i);
-      note = new CharGrid(2, COLOR_WHITE, COLOR_BLACK, i);
-    }else if (i === 3){
+    if (i === 2) {
+      noteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, 2, titles[i], id);
+      note = new CharGrid(2, COLOR_WHITE, COLOR_BLACK, id);
+    } else if (i === 3) {
       let randColor = random(COLORS_THEME);
-      noteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, randColor, 1, titles[i], i);
-      note = new CharGrid(1, COLOR_BLACK, randColor, i);
-    }else{
+      noteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, randColor, 1, titles[i], id);
+      note = new CharGrid(1, COLOR_BLACK, randColor, id);
+    } else {
       let randColor = random(COLORS_NOTE_PLAYFUL);
-      noteThumbnail = new DraggableNote(rX, rY, randColor, COLOR_BLACK, 0, titles[i], i);
-      note = new CharGrid(0, randColor, COLOR_BLACK, i);
+      noteThumbnail = new DraggableNote(rX, rY, randColor, COLOR_BLACK, 0, titles[i], id);
+      note = new CharGrid(0, randColor, COLOR_BLACK, id);
     }
     note.addLine(titles[i]);
     noteContainer.push(note);
@@ -294,8 +300,8 @@ function setupFirstUse(){
   let sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
 }
 
-function displayNoteThumbnails(){
-  for(let i = 0; i < noteContainer.length; i++){
+function displayNoteThumbnails() {
+  for (let i = 0; i < noteContainer.length; i++) {
     noteThumbnailContainer[i].display();
   }
 }
@@ -342,10 +348,10 @@ function displayTrashCan() {
     stroke(COLOR_WHITE);
     strokeWeight(4);
     fill(COLOR_WHITE);
-    ellipse(mouseX + radius/2, mouseY - radius/2, radius);
+    ellipse(mouseX + radius / 2, mouseY - radius / 2, radius);
     fill(COLOR_BLACK);
-    arc(mouseX + radius/2, mouseY - radius/2, radius, radius, -90, trashAnim.angle);
-    if (trashAnim.angle >= 269 && !trashAnim.deleteDone){
+    arc(mouseX + radius / 2, mouseY - radius / 2, radius, radius, -90, trashAnim.angle);
+    if (trashAnim.angle >= 269 && !trashAnim.deleteDone) {
       deleteNote(selectedItem.id);
     }
   } else {
@@ -401,22 +407,32 @@ function updateSelectedItem(type, id) {
   selectedItem.id = id;
 }
 
-function displayTooltip(){
+function updateDraggableItems(obj, state) {
+  if (state) {
+    if (!hoveredDraggables.includes(obj)) {
+      hoveredDraggables.push(obj);
+    }
+  } else {
+    removeFromArray(hoveredDraggables, obj);
+  }
+}
+
+function displayTooltip() {
   push();
   fill(COLOR_WHITE);
   textFont(FONT_PLAYFUL);
   textSize(16);
-  textAlign(LEFT,CENTER);
+  textAlign(LEFT, CENTER);
   let tipPosX = mouseX;
   let tipPosY = mouseY + 24;
-  if (mouseX > windowWidth - textWidth(currentTooltip)){
+  if (mouseX > windowWidth - textWidth(currentTooltip)) {
     tipPosX -= textWidth(currentTooltip);
   }
   text(currentTooltip, tipPosX, tipPosY);
   pop();
 }
 
-function showTooltip(text){
+function showTooltip(text) {
   currentTooltip = text;
   isShowingTooltip = true;
 }
@@ -431,55 +447,45 @@ function checkForNoteDeletion() {
   return false;
 }
 
-function deleteNote(id){
+function deleteNote(id) {
   cursor(ARROW);
   updateSelectedItem("", -1);
-  for(let i = 0; i < noteContainer.length; i++){
-    if(noteThumbnailContainer[i].id === id){
-      let tempLast = noteThumbnailContainer[noteThumbnailContainer.length - 1];
-      noteThumbnailContainer[noteThumbnailContainer.length - 1] = noteThumbnailContainer[i];
-      noteThumbnailContainer[i] = tempLast;
-
-      console.log("\"" + noteThumbnailContainer.pop().title + "\" is deleted.");
-    }
-    if (noteContainer[i].id === id){
-      let tempLast = noteContainer[noteContainer.length - 1];
-      noteContainer[noteContainer.length - 1] = noteContainer[i];
-      noteContainer[i] = tempLast;
-
-      noteContainer.pop();
-    }
-  }
+  removeFromArrayByItemIndex(noteContainer, id);
+  removeFromArrayByItemIndex(noteThumbnailContainer, id)
   trashAnim.deleteDone = true;
 }
 
-function createNote(theme){
-  let randId = random(100);
-  let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
-  let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
-  let newNote, newNoteThumbnail;
-  switch(theme){
-    case 0:
-      newNote = new CharGrid(theme, COLOR_YELLOW_PASTEL, COLOR_BLACK, randId);
-      newNoteThumbnail = new DraggableNote(rX, rY, COLOR_YELLOW_PASTEL, COLOR_BLACK, theme, "", randId);
-      break;
-    case 1:
-      newNote = new CharGrid(theme, COLOR_BLACK, COLOR_ORNAGE, randId);
-      newNoteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, COLOR_ORNAGE, theme, "", randId);
-      break;
-    case 2:
-      newNote = new CharGrid(theme, COLOR_WHITE, COLOR_BLACK, randId);
-      newNoteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, theme, "", randId);
+function createNote(theme) {
+  if (noteContainer.length < MAX_NOTE_NUM) {
+    let randId = getItemId();
+    let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
+    let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
+    let newNote, newNoteThumbnail;
+    switch (theme) {
+      case 0:
+        newNote = new CharGrid(theme, COLOR_YELLOW_PASTEL, COLOR_BLACK, randId);
+        newNoteThumbnail = new DraggableNote(rX, rY, COLOR_YELLOW_PASTEL, COLOR_BLACK, theme, "", randId);
+        break;
+      case 1:
+        newNote = new CharGrid(theme, COLOR_BLACK, COLOR_ORNAGE, randId);
+        newNoteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, COLOR_ORNAGE, theme, "", randId);
+        break;
+      case 2:
+        newNote = new CharGrid(theme, COLOR_WHITE, COLOR_BLACK, randId);
+        newNoteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, theme, "", randId);
+    }
+    noteContainer.push(newNote);
+    noteThumbnailContainer.push(newNoteThumbnail);
+    console.log("A new note is created. Theme: " + theme);
+  } else {
+    console.log("Cannot create note. Max number reached.");
   }
-  noteContainer.push(newNote);
-  noteThumbnailContainer.push(newNoteThumbnail);
-  console.log("A new note is created. Theme: " + theme);
 }
 
-function openNote(id){
-  for(let i = 0; i < noteContainer.length; i++){
-    if (id === noteContainer[i].id){
-        charGrid = noteContainer[i];
+function openNote(id) {
+  for (let i = 0; i < noteContainer.length; i++) {
+    if (id === noteContainer[i].id) {
+      charGrid = noteContainer[i];
     }
   }
   editingNote = true;
@@ -504,7 +510,7 @@ function doubleClicked() {
 
 // check for delete and return key
 function keyPressed() {
-  if (editingNote){
+  if (editingNote) {
     // delete
     if (keyCode === 8) {
       charGrid.removeChar();
@@ -520,10 +526,60 @@ function keyPressed() {
 
 // check for character typed
 function keyTyped() {
-  if (editingNote){
+  if (editingNote) {
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
       charGrid.keyIsTyped = true;
     }
   }
+}
+
+function removeFromArray(array, obj){
+  for (let i = 0; i < array.length; i++) {
+    if (array[i] === obj) {
+      let tempLast = array[array.length - 1];
+      array[array.length - 1] = array[i];
+      array[i] = tempLast;
+      array.pop();
+      return true
+    }
+  }
+  return false;
+}
+
+function removeFromArrayByItemIndex(array, id){
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].id === id) {
+      let tempLast = array[array.length - 1];
+      array[array.length - 1] = array[i];
+      array[i] = tempLast;
+      array.pop();
+      return true
+    }
+  }
+  return false;
+}
+
+function getItemId(){
+  return currentItemIndex ++;
+}
+
+function findTopItem(){
+  let top = hoveredDraggables[0];
+  for(let i = 1; i < hoveredDraggables.length; i++){
+    if(top.type === "NOTE"){
+      if (hoveredDraggables[i].type === "AWARD"){
+        top = hoveredDraggables[i];
+      }else{
+        if (top.id < hoveredDraggables[i].id){
+          top = hoveredDraggables[i];
+        }
+      }
+    }else{
+      if (top.id < hoveredDraggables[i].id){
+        top = hoveredDraggables[i];
+      }
+    }
+  }
+  return top;
 }

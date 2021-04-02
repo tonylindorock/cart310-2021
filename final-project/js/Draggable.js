@@ -23,9 +23,12 @@ class Draggable{
       cursor(ARROW);
       this.isHovered = true;
 
+      updateDraggableItems(this, true);
+
       if (mouseIsPressed){
         cursor('grab');
-        if (selectedItem.id != this.id && selectedItem.type != this.type){
+        let top = findTopItem();
+        if (selectedItem.id != this.id && selectedItem.type != this.type && top.id === this.id && top.type === this.type){
           updateSelectedItem(this.type, this.id);
         }
         if (selectedItem.id === this.id && selectedItem.type === this.type){
@@ -47,6 +50,7 @@ class Draggable{
         cursor(ARROW);
       }
       this.isHovered = false;
+      updateDraggableItems(this, false);
     }
   }
 
