@@ -7,6 +7,8 @@ class CharGrid{
     this.bgColor = bgColor;
     this.textColor = textColor;
 
+    this.scanLineCount = 100;
+
     this.lines = [""];
     this.characters = [];
     this.characters[0] = [];
@@ -35,10 +37,10 @@ class CharGrid{
 
   addChar(character, special = ""){
     let valid = true;
-    if (this.lines[this.pointerPosY].length === CHAR_WIDTH){
-      this.pointerPosX = 0;
-      if (this.lines.length < CHAR_HEIGHT){
+    if (this.pointerPosX === CHAR_WIDTH){
+      if (this.pointerPosY != CHAR_HEIGHT - 1){
         this.pointerPosY += 1;
+        this.pointerPosX = 0;
         this.lines.push("");
         this.characters.push([]);
       }else{
@@ -52,11 +54,13 @@ class CharGrid{
       this.lines[this.pointerPosY] =  this.lines[this.pointerPosY] + character;
       this.characters[this.pointerPosY].push(newChar);
       //console.log(character + " New char added at "+ this.pointerPosX + " " + this.pointerPosY);
-      if (character === "\n" && this.pointerPosY < CHAR_HEIGHT){
-        this.pointerPosY += 1;
-        this.pointerPosX = 0;
-        this.lines.push("");
-        this.characters.push([]);
+      if (character === "\n"){
+        if (this.pointerPosY < CHAR_HEIGHT - 1){
+          this.pointerPosY += 1;
+          this.pointerPosX = 0;
+          this.lines.push("");
+          this.characters.push([]);
+        }
       }else{
         this.pointerPosX += 1;
       }
@@ -133,15 +137,29 @@ class CharGrid{
     }else{
       noFill();
     }
-    rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, 3, MAX_NOTE_SIZE/CHAR_HEIGHT);
+    if (this.theme != 1){
+      rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, 3, MAX_NOTE_SIZE/CHAR_HEIGHT);
+    }else{
+      rect(this.pointerPosX * MAX_NOTE_SIZE/CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE/CHAR_HEIGHT, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT);
+    }
     pop();
   }
 
   display(){
     push();
+    // draw frame for terminal
+    if (this.theme === 1){
+      let size = this.MAX_SIZE + 128;
+      push();
+      translate(windowWidth/2-size/2, 0);
+      fill(COLOR_GREY_DARK);
+      rect(0,0, size, windowHeight);
+      pop();
+    }
     translate(windowWidth/2-this.MAX_SIZE/2, TOP_MENU_HEIGHT/2);
     rectMode(CORNER);
     fill(this.bgColor);
+    // padding
     stroke(this.bgColor);
     strokeWeight(32);
     rect(0, 0, this.MAX_SIZE, this.MAX_SIZE);
@@ -154,6 +172,18 @@ class CharGrid{
       }
     }
     pop();
-    this.displayPointer()
+
+    this.displayPointer();
+
+    // draw scanlines for terminal
+    push();
+    translate(windowWidth/2-this.MAX_SIZE/2, TOP_MENU_HEIGHT/2);
+    if(this.theme === 1){
+      for(let i = 0; i < this.scanLineCount; i++){
+        fill(0,0,0,50);
+        rect(-16,i * (this.MAX_SIZE+32)/this.scanLineCount - 16,this.MAX_SIZE + 32, (this.MAX_SIZE+32)/(this.scanLineCount*2));
+      }
+    }
+    pop();
   }
 }

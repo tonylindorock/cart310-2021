@@ -80,7 +80,7 @@ class Character{
     }
 
     if (checkForMouseOver(windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2, TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT) && (this.underlineEnabled || this.highlightEnabled)){
-      fill(0,0,255,50);
+      fill(0,100,255,50);
       rect(-2,0, MAX_NOTE_SIZE/CHAR_WIDTH + 4, MAX_NOTE_SIZE/CHAR_HEIGHT);
 
       if (mouseIsPressed){
@@ -88,11 +88,20 @@ class Character{
           this.pressTime += 1;
           if (this.underlineEnabled){
             this.underline = !this.underline;
-            this.underlineColor = PEN_COLORS[penColorIndex];
+            if (charGrid.theme != 1){
+              this.underlineColor = PEN_COLORS[penColorIndex];
+            }else{
+              this.underlineColor = textColor;
+            }
           }
           if (this.highlightEnabled){
             this.highlight = !this.highlight;
-            this.highlightColor = HIGHLIGHT_COLORS[highlighColorIndex];
+            if (charGrid.theme != 1){
+              this.highlightColor = HIGHLIGHT_COLORS[highlighColorIndex];
+            }else{
+              this.highlightColor = textColor;
+            }
+
           }
         }
       }else{
@@ -101,8 +110,12 @@ class Character{
     }else{
       this.pressTime = 0;
     }
-
-    fill(textColor);
+    // special case: terminal
+    if (charGrid.theme === 1 && this.highlight){
+      fill(bgColor);
+    }else{
+      fill(textColor);
+    }
     textAlign(CENTER, CENTER);
     textSize(FONT_SIZE);
     text(this.char, MAX_NOTE_SIZE/CHAR_WIDTH/2, MAX_NOTE_SIZE/CHAR_HEIGHT/2);

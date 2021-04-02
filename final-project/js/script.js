@@ -32,7 +32,7 @@ const ADD_MENU_HEIGHT = 160;
 const UNI_BTN_HEIGHT = 32;
 const UNI_BTNC_HEIGHT = 192;
 
-const ALL_CHAR = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=!@#$%^&*()_+,.<>?\'\"\|/\\";
+const ALL_CHAR = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=!@#$%^&*()_+,.<>?:;[]{}\'\"\|/\\";
 
 // **************** COLORS ****************
 const COLOR_BLACK = "#262626";
@@ -453,6 +453,7 @@ function deleteNote(id) {
   removeFromArrayByItemIndex(noteContainer, id);
   removeFromArrayByItemIndex(noteThumbnailContainer, id)
   trashAnim.deleteDone = true;
+  hoveredDraggables = [];
 }
 
 function createNote(theme) {
@@ -489,6 +490,7 @@ function openNote(id) {
     }
   }
   editingNote = true;
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 // check if mouse is over within a square radius in its position
