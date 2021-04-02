@@ -104,9 +104,12 @@ let editingNote = false;
 let isShowingTooltip = false;
 let currentTooltip = "";
 
-let noteContainer = [];
+let noteThumbnailContainer = [];
 let stickerContainer = [];
 let badgeContainer = [];
+
+let noteContainer = [];
+
 let charGrid;
 
 let btnAdd;
@@ -154,8 +157,6 @@ function setup() {
   createCanvas(windowWidth, windowHeight*2);
   noStroke();
 
-  charGrid = new CharGrid(0, COLOR_ORANGE_PASTEL, COLOR_BLACK);
-
   setupMainMenuBtns();
   setupNoteEditorBtns();
   setupFirstUse();
@@ -196,6 +197,9 @@ function setupMainMenuBtns() {
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
   btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
+  btnPlain.connectFunc(function(){
+    createNote(2);
+  });
 }
 
 // set up buttons in note editor
@@ -270,22 +274,29 @@ function setupFirstUse(){
   for(let i = 0; i < titles.length; i++){
     let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
     let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
-    let note;
+    let noteThumbnail, note;
     if(i === 2){
-      note = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, 2, titles[i], i);
+      noteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, 2, titles[i], i);
+      note = new CharGrid(2, COLOR_WHITE, COLOR_BLACK, i);
     }else if (i === 3){
-      note = new DraggableNote(rX, rY, COLOR_BLACK, random(COLORS_THEME), 1, titles[i], i);
+      let randColor = random(COLORS_THEME);
+      noteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, randColor, 1, titles[i], i);
+      note = new CharGrid(1, COLOR_BLACK, randColor, i);
     }else{
-      note = new DraggableNote(rX, rY, random(COLORS_NOTE_PLAYFUL), COLOR_BLACK, 0, titles[i], i);
+      let randColor = random(COLORS_NOTE_PLAYFUL);
+      noteThumbnail = new DraggableNote(rX, rY, randColor, COLOR_BLACK, 0, titles[i], i);
+      note = new CharGrid(0, randColor, COLOR_BLACK, i);
     }
+    note.addLine(titles[i]);
     noteContainer.push(note);
+    noteThumbnailContainer.push(noteThumbnail);
   }
   let sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
 }
 
 function displayNoteThumbnails(){
   for(let i = 0; i < noteContainer.length; i++){
-    noteContainer[i].display();
+    noteThumbnailContainer[i].display();
   }
 }
 
@@ -424,15 +435,54 @@ function deleteNote(id){
   cursor(ARROW);
   updateSelectedItem("", -1);
   for(let i = 0; i < noteContainer.length; i++){
+    if(noteThumbnailContainer[i].id === id){
+      let tempLast = noteThumbnailContainer[noteThumbnailContainer.length - 1];
+      noteThumbnailContainer[noteThumbnailContainer.length - 1] = noteThumbnailContainer[i];
+      noteThumbnailContainer[i] = tempLast;
+
+      console.log("\"" + noteThumbnailContainer.pop().title + "\" is deleted.");
+    }
     if (noteContainer[i].id === id){
       let tempLast = noteContainer[noteContainer.length - 1];
       noteContainer[noteContainer.length - 1] = noteContainer[i];
       noteContainer[i] = tempLast;
-      console.log("\"" + noteContainer.pop().title + "\" is deleted.");
 
+      noteContainer.pop();
     }
   }
   trashAnim.deleteDone = true;
+}
+
+function createNote(theme){
+  let randId = random(100);
+  let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
+  let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
+  let newNote, newNoteThumbnail;
+  switch(theme){
+    case 0:
+      newNote = new CharGrid(theme, COLOR_YELLOW_PASTEL, COLOR_BLACK, randId);
+      newNoteThumbnail = new DraggableNote(rX, rY, COLOR_YELLOW_PASTEL, COLOR_BLACK, theme, "", randId);
+      break;
+    case 1:
+      newNote = new CharGrid(theme, COLOR_BLACK, COLOR_ORNAGE, randId);
+      newNoteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, COLOR_ORNAGE, theme, "", randId);
+      break;
+    case 2:
+      newNote = new CharGrid(theme, COLOR_WHITE, COLOR_BLACK, randId);
+      newNoteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, theme, "", randId);
+  }
+  noteContainer.push(newNote);
+  noteThumbnailContainer.push(newNoteThumbnail);
+  console.log("A new note is created. Theme: " + theme);
+}
+
+function openNote(id){
+  for(let i = 0; i < noteContainer.length; i++){
+    if (id === noteContainer[i].id){
+        charGrid = noteContainer[i];
+    }
+  }
+  editingNote = true;
 }
 
 // check if mouse is over within a square radius in its position
@@ -445,10 +495,10 @@ function checkForMouseOver(x, y, w, h) {
 function doubleClicked() {
   // if double click on a note, it opens note editor
   if (selectedItem.type === "NOTE") {
-    editingNote = true;
+    openNote(selectedItem.id);
+    console.log("Open note " + selectedItem.id);
     updateSelectedItem("", -1);
     cursor(ARROW);
-    console.log("Open note " + selectedItem.id);
   }
 }
 

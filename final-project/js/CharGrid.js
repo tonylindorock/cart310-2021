@@ -1,6 +1,7 @@
 // Notepad with lines
 class CharGrid{
-  constructor(theme, bgColor, textColor){
+  constructor(theme, bgColor, textColor, id){
+    this.id = id;
     this.theme = theme;
     this.font = "Courier";
     this.bgColor = bgColor;
