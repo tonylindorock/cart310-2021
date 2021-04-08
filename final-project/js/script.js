@@ -1,11 +1,11 @@
 /*****************
 
-Noteepadd
+Noteeboardd
 Yichen Wang
 
 CART 310 Final Project
 
-Noteepadd is a playful, minimalistic note/text editor.
+Noteeboardd is a playful, minimalistic note/text editor.
 
 FONTS FROM:
 https://www.1001fonts.com/goldie-boxing-font.html
@@ -107,6 +107,10 @@ let editingNote = false;
 let isShowingTooltip = false;
 let currentTooltip = "";
 
+let displayLevelHeight = 0;
+let scrollPos = 0;
+let scrolledDown = false;
+
 let noteThumbnailContainer = [];
 let stickerContainer = [];
 let badgeContainer = [];
@@ -115,7 +119,9 @@ let hoveredDraggables = [];
 
 let noteContainer = [];
 
+let user;
 let charGrid;
+let levelProgress;
 
 let btnAdd;
 let btnPlayful;
@@ -159,8 +165,11 @@ function preload() {
 
 // setup main screen
 function setup() {
+
   createCanvas(windowWidth, windowHeight * 2);
   noStroke();
+
+  setupUser();
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
@@ -173,6 +182,7 @@ function draw() {
     displayNoteEditor();
   } else {
     displayMainMeun();
+    displayStatistics();
     displayNoteThumbnails();
     if (showAddMenu) {
       displayAddMenu();
@@ -182,6 +192,11 @@ function draw() {
   if (isShowingTooltip) {
     displayTooltip();
   }
+}
+
+function setupUser(){
+  user = new User();
+  levelProgress = new Progress(0, 5, nextLevelXp(1));
 }
 
 // setup all the main menu buttons
@@ -344,7 +359,7 @@ function displayMainMeun() {
   textAlign(CENTER);
   textSize(64);
   fill(COLOR_WHITE);
-  text("Noteepadd", windowWidth / 2, TOP_MENU_HEIGHT / 2 + (MARGIN / 2));
+  text("Noteeboardd", windowWidth / 2, TOP_MENU_HEIGHT / 2 + (MARGIN / 2));
   btnAdd.display();
 
   // trash and delete
@@ -444,22 +459,6 @@ function displayNoteEditor() {
 
 }
 
-// update dragged item
-function updateSelectedItem(type, id) {
-  selectedItem.type = type;
-  selectedItem.id = id;
-}
-
-function updateDraggableItems(obj, state) {
-  if (state) {
-    if (!hoveredDraggables.includes(obj)) {
-      hoveredDraggables.push(obj);
-    }
-  } else {
-    removeFromArray(hoveredDraggables, obj);
-  }
-}
-
 function displayTooltip() {
   push();
   fill(COLOR_WHITE);
@@ -478,6 +477,65 @@ function displayTooltip() {
 function showTooltip(text) {
   currentTooltip = text;
   isShowingTooltip = true;
+}
+
+function displayStatistics(){
+  // bg
+  push();
+  rectMode(CORNER);
+  fill(COLOR_BLACK);
+  rect(0, windowHeight, windowWidth, windowHeight);
+  pop();
+  displayLevel();
+}
+
+function displayLevel(){
+  push();
+  rectMode(CENTER);
+  textFont(FONT_PLAYFUL);
+  translate(windowWidth/2, windowHeight + TOP_MENU_HEIGHT);
+
+  let width = 96;
+  let progressHeight = levelProgress.getConvertedValue(0,width);
+
+  if (scrolledDown){
+    displayLevelHeight = lerp(displayLevelHeight, progressHeight, 0.05);
+  }
+
+  fill(COLOR_GREY_DARK);
+  rect(- width,0,width * 1.05,width * 1.05, 8);
+  stroke(COLOR_GREY_DARK);
+  strokeWeight(4);
+  fill(COLOR_BLUE);
+  if (displayLevelHeight >= 4){
+    rect(-width,(width * 1.05)/2 - displayLevelHeight/2,width,displayLevelHeight, 8);
+  }
+
+  noStroke();
+  fill(COLOR_WHITE);
+  textAlign(CENTER,CENTER);
+  textSize(20);
+  text(user.info.xp + "/" + nextLevelXp(user.info.level), -width,width/3);
+  textAlign(LEFT,CENTER);
+  textSize(48);
+  text("Level " + user.info.level, width/2 - MARGIN,0);
+  pop();
+}
+
+// update dragged item
+function updateSelectedItem(type, id) {
+  selectedItem.type = type;
+  selectedItem.id = id;
+}
+
+function updateDraggableItems(obj, state) {
+  if (state) {
+    if (!hoveredDraggables.includes(obj)) {
+      hoveredDraggables.push(obj);
+    }
+  } else {
+    removeFromArray(hoveredDraggables, obj);
+  }
 }
 
 // check for action of dragging note near trash can icon
@@ -612,6 +670,12 @@ function keyTyped() {
   }
 }
 
+function mouseWheel(event) {
+  if (document.documentElement.scrollTop > windowWidth/4){
+    scrolledDown = true;
+  }
+}
+
 function removeFromArray(array, obj) {
   for (let i = 0; i < array.length; i++) {
     if (array[i] === obj) {
@@ -658,4 +722,12 @@ function findTopItem() {
     }
   }
   return top;
+}
+
+function gainXp(xp){
+
+}
+
+function nextLevelXp(level){
+  return Math.round(0.8 * level * level + 10 * level);
 }
