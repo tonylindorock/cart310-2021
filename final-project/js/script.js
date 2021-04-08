@@ -32,6 +32,8 @@ const ADD_MENU_HEIGHT = 160;
 const UNI_BTN_HEIGHT = 32;
 const UNI_BTNC_HEIGHT = 192;
 
+const INFO_SQUARE_SIZE = 160;
+
 const ALL_CHAR = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=!@#$%^&*()_+,.<>?:;[]{}\'\"\|/\\";
 
 // **************** COLORS ****************
@@ -123,6 +125,14 @@ let user;
 let charGrid;
 let levelProgress;
 
+let infoTypedKeys;
+let infoCheckedBoxes;
+let infoSpaceEfficiency;
+let infoChallengesDone;
+let infoMagnets;
+let infoDuration;
+let infoArray = [];
+
 let btnAdd;
 let btnPlayful;
 let btnTerminal;
@@ -182,7 +192,7 @@ function draw() {
     displayNoteEditor();
   } else {
     displayMainMeun();
-    displayStatistics();
+    displayUserInfo();
     displayNoteThumbnails();
     if (showAddMenu) {
       displayAddMenu();
@@ -197,6 +207,13 @@ function draw() {
 function setupUser(){
   user = new User();
   levelProgress = new Progress(0, 5, nextLevelXp(1));
+  infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
+  infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN/2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
+  infoSpaceEfficiency = new InfoSquare((INFO_SQUARE_SIZE + MARGIN/2)*2, 0, "Use of Space", 55, "Efficiency", COLOR_GREEN, "%");
+  infoChallengesDone = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN/2, "Completed", 2, "Challenge(s)", COLOR_ORANGE);
+  infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN/2, INFO_SQUARE_SIZE + MARGIN/2, "Earned", 1, "Magnet(s)", COLOR_PURPLE);
+  infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN/2)*2, INFO_SQUARE_SIZE + MARGIN/2, "User for", 1, "day(s)", COLOR_YELLOW);
+  infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoChallengesDone, infoMagnets, infoDuration];
 }
 
 // setup all the main menu buttons
@@ -479,7 +496,7 @@ function showTooltip(text) {
   isShowingTooltip = true;
 }
 
-function displayStatistics(){
+function displayUserInfo(){
   // bg
   push();
   rectMode(CORNER);
@@ -487,6 +504,7 @@ function displayStatistics(){
   rect(0, windowHeight, windowWidth, windowHeight);
   pop();
   displayLevel();
+  displayStatistics();
 }
 
 function displayLevel(){
@@ -519,6 +537,17 @@ function displayLevel(){
   textAlign(LEFT,CENTER);
   textSize(48);
   text("Level " + user.info.level, width/2 - MARGIN,0);
+  pop();
+}
+
+function displayStatistics(){
+  push();
+  let translateX = windowWidth/2;
+  let translateY = windowHeight + TOP_MENU_HEIGHT*4;
+  translate(translateX, translateY);
+  for(let i = 0; i< infoArray.length; i++){
+    infoArray[i].display(translateX, translateY);
+  }
   pop();
 }
 
@@ -671,7 +700,7 @@ function keyTyped() {
 }
 
 function mouseWheel(event) {
-  if (document.documentElement.scrollTop > windowWidth/4){
+  if (document.documentElement.scrollTop > windowHeight/4){
     scrolledDown = true;
   }
 }
