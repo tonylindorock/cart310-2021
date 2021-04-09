@@ -1,5 +1,6 @@
-class Draggable{
-  constructor(posX, posY, width, height, type, id){
+// a draggable object
+class Draggable {
+  constructor(posX, posY, width, height, type, id) {
     this.posX = posX;
     this.posY = posY;
 
@@ -17,54 +18,62 @@ class Draggable{
     this.offsetX = 0.0;
     this.offsetY = 0.0;
   }
-
-  checkForMouse(){
-    if (checkForMouseOver(this.posX, this.posY, this.width, this.height)){
+  // check for mouse hovering and clicking
+  checkForMouse() {
+    if (checkForMouseOver(this.posX, this.posY, this.width, this.height)) {
       cursor(ARROW);
       this.isHovered = true;
-
+      // push to hovered draggables array
       updateDraggableItems(this, true);
 
-      if (mouseIsPressed){
+      if (mouseIsPressed) {
         cursor('grab');
-        let top = findTopItem();
-        if (selectedItem.id != this.id && selectedItem.type != this.type && top.id === this.id && top.type === this.type){
-          updateSelectedItem(this.type, this.id);
-        }
-        if (selectedItem.id === this.id && selectedItem.type === this.type){
+        let top = findTopItem(); // get the draggable on the very top
+        // if it's the selected item and the object on the top
+        if (selectedItem.id != this.id && selectedItem.type != this.type && top.id === this.id && top.type === this.type) {
+            if (selectedItem.id === -1){
+              // remember the selected object
+              updateSelectedItem(this.type, this.id);
+            }
+          }
+        // check for remembered draggable and move it with mouse motion
+        if (selectedItem.id === this.id && selectedItem.type === this.type) {
           this.mouseClicked = true;
           this.posX = mouseX - this.offsetX;
           this.posY = mouseY - this.offsetY;
         }
-      }else{
+      // if mouse button up
+      } else {
         this.mouseClicked = false;
-        if (selectedItem.id === this.id && selectedItem.type === this.type){
-          updateSelectedItem("",-1);
+        // reset selected item
+        if (selectedItem.id === this.id && selectedItem.type === this.type) {
+          updateSelectedItem("", -1);
         }
       }
+      // so that the draggable won't reposition when selected
       this.offsetX = mouseX - this.posX;
       this.offsetY = mouseY - this.posY;
-
-    }else{
-      if (this.isHovered){
+    // if not hovered
+    } else {
+      if (this.isHovered) {
         cursor(ARROW);
       }
       this.isHovered = false;
       updateDraggableItems(this, false);
     }
   }
-
-  forget(){
+  // forget this draggable
+  forget() {
     this.isHovered = false;
     this.mouseClicked = false;
   }
 
-  checkForDrag(){
-    if (this.mouseClicked){
+  checkForDrag() {
+    if (this.mouseClicked && selectedItem.id === this.id && selectedItem.type === this.type) {
       this.posX = mouseX - this.offsetX;
       this.posY = mouseY - this.offsetY;
     }
   }
 
-  display(){}
+  display() {}
 }

@@ -114,8 +114,7 @@ let scrollPos = 0;
 let scrolledDown = false;
 
 let noteThumbnailContainer = [];
-let stickerContainer = [];
-let badgeContainer = [];
+let magnetContainer = [];
 
 let hoveredDraggables = [];
 
@@ -194,6 +193,7 @@ function draw() {
     displayMainMeun();
     displayUserInfo();
     displayNoteThumbnails();
+    displayAwards();
     if (showAddMenu) {
       displayAddMenu();
     }
@@ -204,15 +204,15 @@ function draw() {
   }
 }
 
-function setupUser(){
+function setupUser() {
   user = new User();
   levelProgress = new Progress(0, 5, nextLevelXp(1));
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
-  infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN/2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
-  infoSpaceEfficiency = new InfoSquare((INFO_SQUARE_SIZE + MARGIN/2)*2, 0, "Use of Space", 55, "Efficiency", COLOR_GREEN, "%");
-  infoChallengesDone = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN/2, "Completed", 2, "Challenge(s)", COLOR_ORANGE);
-  infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN/2, INFO_SQUARE_SIZE + MARGIN/2, "Earned", 1, "Magnet(s)", COLOR_PURPLE);
-  infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN/2)*2, INFO_SQUARE_SIZE + MARGIN/2, "User for", 1, "day(s)", COLOR_YELLOW);
+  infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
+  infoSpaceEfficiency = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, 0, "Use of Space", 55, "Efficiency", COLOR_GREEN, "%");
+  infoChallengesDone = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN / 2, "Completed", 2, "Challenge(s)", COLOR_ORANGE);
+  infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, INFO_SQUARE_SIZE + MARGIN / 2, "Earned", 1, "Magnet(s)", COLOR_PURPLE);
+  infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, INFO_SQUARE_SIZE + MARGIN / 2, "User for", 1, "day(s)", COLOR_YELLOW);
   infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoChallengesDone, infoMagnets, infoDuration];
 }
 
@@ -259,9 +259,9 @@ function setupNoteEditorBtns() {
   connectEditorBtns();
 }
 
-function connectEditorBtns(){
+function connectEditorBtns() {
   // close note
-  btnClose.connectFunc(function(){
+  btnClose.connectFunc(function() {
     editingNote = false;
     updateNoteThumbnail();
   });
@@ -356,12 +356,21 @@ function setupFirstUse() {
     noteContainer.push(note);
     noteThumbnailContainer.push(noteThumbnail);
   }
-  let sticker = new DraggableAward(windowWidth / 2, windowHeight / 2, COLOR_ORANGE, STICKER_ONE_HUNDREN, 1, 0);
+  let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
+  let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
+  let magnet = new DraggableAward(rX, rY, COLOR_RED, STICKER_ONE_HUNDREN, noteThumbnailContainer.length);
+  magnetContainer.push(magnet);
 }
 
 function displayNoteThumbnails() {
   for (let i = 0; i < noteContainer.length; i++) {
     noteThumbnailContainer[i].display();
+  }
+}
+
+function displayAwards(){
+  for(let i = 0;i<magnetContainer.length; i++){
+    magnetContainer[i].display();
   }
 }
 
@@ -390,10 +399,10 @@ function displayMainMeun() {
     trashAnim.radius = lerp(trashAnim.radius, 0, trashAnim.speed);
     ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, trashAnim.radius);
   }
-  if(noteContainer.length === 0){
+  if (noteContainer.length === 0) {
     textSize(32);
     fill(COLOR_WHITE);
-    text("Add a note and start typing!", windowWidth / 2, windowHeight/2);
+    text("Add a note and start typing!", windowWidth / 2, windowHeight / 2);
   }
   pop();
 }
@@ -496,7 +505,7 @@ function showTooltip(text) {
   isShowingTooltip = true;
 }
 
-function displayUserInfo(){
+function displayUserInfo() {
   // bg
   push();
   rectMode(CORNER);
@@ -505,49 +514,73 @@ function displayUserInfo(){
   pop();
   displayLevel();
   displayStatistics();
+  displayChallenages();
 }
 
-function displayLevel(){
+function displayLevel() {
   push();
   rectMode(CENTER);
   textFont(FONT_PLAYFUL);
-  translate(windowWidth/2, windowHeight + TOP_MENU_HEIGHT);
+  translate(windowWidth / 2, windowHeight + TOP_MENU_HEIGHT);
 
   let width = 96;
-  let progressHeight = levelProgress.getConvertedValue(0,width);
-
-  if (scrolledDown){
+  let progressHeight = levelProgress.getConvertedValue(0, width);
+  // animation
+  if (scrolledDown) {
     displayLevelHeight = lerp(displayLevelHeight, progressHeight, 0.05);
   }
-
+  // visualization
   fill(COLOR_GREY_DARK);
-  rect(- width,0,width * 1.05,width * 1.05, 8);
+  rect(-width, 0, width * 1.05, width * 1.05, 8);
   stroke(COLOR_GREY_DARK);
   strokeWeight(4);
   fill(COLOR_BLUE);
-  if (displayLevelHeight >= 4){
-    rect(-width,(width * 1.05)/2 - displayLevelHeight/2,width,displayLevelHeight, 8);
+  if (displayLevelHeight >= 10) {
+    rect(-width, (width * 1.05) / 2 - displayLevelHeight / 2, width, displayLevelHeight, 8);
   }
-
+  // text
   noStroke();
   fill(COLOR_WHITE);
-  textAlign(CENTER,CENTER);
+  textAlign(CENTER, CENTER);
   textSize(20);
-  text(user.info.xp + "/" + nextLevelXp(user.info.level), -width,width/3);
-  textAlign(LEFT,CENTER);
+  text(user.info.xp + "/" + nextLevelXp(user.info.level), -width, width / 3);
+  textAlign(LEFT, CENTER);
   textSize(48);
-  text("Level " + user.info.level, width/2 - MARGIN,0);
+  text("Level " + user.info.level, width / 2 - MARGIN, 0);
   pop();
 }
 
-function displayStatistics(){
+function displayStatistics() {
   push();
-  let translateX = windowWidth/2;
-  let translateY = windowHeight + TOP_MENU_HEIGHT*4;
+  let translateX = windowWidth/2 - (INFO_SQUARE_SIZE*3 + MARGIN*2);
+  let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
   translate(translateX, translateY);
-  for(let i = 0; i< infoArray.length; i++){
+  textAlign(LEFT,CENTER);
+  textFont(FONT_PLAYFUL);
+  fill(COLOR_WHITE);
+  textSize(64);
+  text("Statistics", 0, -MARGIN*2);
+  // info squares
+  for (let i = 0; i < infoArray.length; i++) {
     infoArray[i].display(translateX, translateY);
   }
+  pop();
+}
+
+function displayChallenages(){
+  push();
+  let translateX = windowWidth - (INFO_SQUARE_SIZE*3 + MARGIN*6);
+  let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
+  translate(translateX, translateY);
+  textAlign(LEFT,CENTER);
+  textFont(FONT_PLAYFUL);
+  fill(COLOR_WHITE);
+  textSize(64);
+  text("Challenges", 0, -MARGIN*2);
+  noFill();
+  stroke(COLOR_WHITE);
+  strokeWeight(2);
+  rect(0,0,(INFO_SQUARE_SIZE*3 + MARGIN), (INFO_SQUARE_SIZE*2 + MARGIN/2), 16);
   pop();
 }
 
@@ -581,7 +614,7 @@ function deleteNote(id) {
   cursor(ARROW);
   updateSelectedItem("", -1);
   removeFromArrayByItemId(noteContainer, id);
-  console.log("\""+removeFromArrayByItemId(noteThumbnailContainer, id).title+"\" is deleted.");
+  console.log("\"" + removeFromArrayByItemId(noteThumbnailContainer, id).title + "\" is deleted.");
   trashAnim.deleteDone = true;
   hoveredDraggables = [];
 }
@@ -640,7 +673,7 @@ function openNote(id) {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-function updateNoteThumbnail(){
+function updateNoteThumbnail() {
   for (let i = 0; i < noteThumbnailContainer.length; i++) {
     if (charGrid.id === noteThumbnailContainer[i].id) {
       noteThumbnailContainer[i].bgColor = charGrid.bgColor;
@@ -662,8 +695,8 @@ function doubleClicked() {
   if (selectedItem.type === "NOTE") {
     openNote(selectedItem.id);
     console.log("Open note " + selectedItem.id);
-    for(let i = 0; i < noteThumbnailContainer.length; i ++){
-      if (noteThumbnailContainer[i].id === selectedItem.id){
+    for (let i = 0; i < noteThumbnailContainer.length; i++) {
+      if (noteThumbnailContainer[i].id === selectedItem.id) {
         noteThumbnailContainer[i].forget();
       }
     }
@@ -697,10 +730,14 @@ function keyTyped() {
       charGrid.keyIsTyped = true;
     }
   }
+  if (keyCode === 8){
+    console.log(selectedItem);
+    console.log(findTopItem());
+  }
 }
 
 function mouseWheel(event) {
-  if (document.documentElement.scrollTop > windowHeight/4){
+  if (document.documentElement.scrollTop > windowHeight / 4) {
     scrolledDown = true;
   }
 }
@@ -736,27 +773,27 @@ function getItemId() {
 function findTopItem() {
   let top = hoveredDraggables[0];
   for (let i = 1; i < hoveredDraggables.length; i++) {
-    if (top.type === "NOTE") {
-      if (hoveredDraggables[i].type === "AWARD") {
+    if (top.type === "AWARD") {
+      if (hoveredDraggables[i].type === "AWARD" && hoveredDraggables[i].id > top.id){
         top = hoveredDraggables[i];
-      } else {
-        if (top.id < hoveredDraggables[i].id) {
+      }
+    }else{
+      if (hoveredDraggables[i].type === "AWARD"){
+        top = hoveredDraggables[i];
+      }else{
+        if (hoveredDraggables[i].id > top.id){
           top = hoveredDraggables[i];
         }
-      }
-    } else {
-      if (top.id < hoveredDraggables[i].id) {
-        top = hoveredDraggables[i];
       }
     }
   }
   return top;
 }
 
-function gainXp(xp){
+function gainXp(xp) {
 
 }
 
-function nextLevelXp(level){
+function nextLevelXp(level) {
   return Math.round(0.8 * level * level + 10 * level);
 }

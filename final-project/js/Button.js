@@ -19,7 +19,7 @@ class Button{
     this.tooltip = "";
     this.hoverTimeout = null;
   }
-
+  // function when pressed
   connectFunc(def){
     this.func = def;
   }
@@ -29,6 +29,7 @@ class Button{
       cursor(HAND);
       this.isHovered = true;
 
+      // show tooltip when hovered for 2s
       if (this.hoverTimeout === null){
         var thisObject = this;
         this.hoverTimeout = setTimeout(function(){
@@ -39,7 +40,7 @@ class Button{
 
       if (mouseIsPressed){
         this.mouseClicked = true;
-
+        // do once
         if (this.pressTime < 1){
           this.pressTime += 1;
           this.toggled = !this.toggled;

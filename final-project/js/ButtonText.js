@@ -1,6 +1,6 @@
 // a button with text
-class ButtonText extends Button{
-  constructor(posX, posY, width, height, bgColor, inRect, textColor, text){
+class ButtonText extends Button {
+  constructor(posX, posY, width, height, bgColor, inRect, textColor, text) {
     super(posX, posY, width, height);
 
     this.bgColor = bgColor;
@@ -11,48 +11,48 @@ class ButtonText extends Button{
     this.CORNER_RADIUS = 8;
   }
 
-// button style
-  normalStyle(){
-    if (this.inRect){
+  // button style
+  normalStyle() {
+    if (this.inRect) {
       fill(this.bgColor);
       rect(this.posX, this.posY, this.width, this.height, this.CORNER_RADIUS);
       fill(this.textColor);
-    }else{
+    } else {
       fill(this.textColor);
     }
   }
 
-// button style when hovered
-  hoverStyle(){
+  // button style when hovered
+  hoverStyle() {
     this.normalStyle();
   }
 
-// button style when clicked
-  clickStyle(){
-    if (this.inRect){
+  // button style when clicked
+  clickStyle() {
+    if (this.inRect) {
       fill(this.bgColor);
       rect(this.posX, this.posY, this.width, this.height, this.CORNER_RADIUS);
-      fill(255,255,255,75);
+      fill(255, 255, 255, 75);
       rect(this.posX, this.posY, this.width, this.height, this.CORNER_RADIUS);
       fill(this.textColor);
-    }else{
+    } else {
       fill(this.textColor);
     }
   }
 
-  display(){
+  display() {
     this.checkForMouse();
     push();
     rectMode(CENTER);
     noStroke();
-    textAlign(CENTER,CENTER);
+    textAlign(CENTER, CENTER);
     textSize(16);
-    if (this.isHovered){
+    if (this.isHovered) {
       this.hoverStyle();
-      if (this.mouseClicked){
+      if (this.mouseClicked) {
         this.clickStyle();
       }
-    }else{
+    } else {
       this.normalStyle();
     }
     text(this.text, this.posX, this.posY);

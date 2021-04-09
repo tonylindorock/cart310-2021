@@ -1,6 +1,6 @@
 // character obj for display a single char
-class Character{
-  constructor(x, y, char, special = ""){
+class Character {
+  constructor(x, y, char, special = "") {
     this.char = char;
     this.underline = false;
     this.highlight = false;
@@ -24,105 +24,110 @@ class Character{
 
     this.animationDone = true;
 
-    this.globalX = windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2;
-    this.globalY = TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2;
+    this.globalX = windowWidth / 2 - MAX_NOTE_SIZE / 2 + this.posX * MAX_NOTE_SIZE / CHAR_WIDTH + (MAX_NOTE_SIZE / CHAR_WIDTH) / 2;
+    this.globalY = TOP_MENU_HEIGHT / 2 + this.posY * MAX_NOTE_SIZE / CHAR_HEIGHT + (MAX_NOTE_SIZE / CHAR_HEIGHT) / 2;
 
-    if (this.special === "CHECK_BUTTON"){
+    if (this.special === "CHECK_BUTTON") {
       this.setupButton();
     }
   }
-
-  setupButton(){
-    this.button = new ButtonText(this.globalX, this.globalY, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT, COLOR_WHITE, false, COLOR_BLACK, " ");
+  // spawn a button in the position of a checkbox
+  setupButton() {
+    this.button = new ButtonText(this.globalX, this.globalY, MAX_NOTE_SIZE / CHAR_WIDTH, MAX_NOTE_SIZE / CHAR_HEIGHT, COLOR_WHITE, false, COLOR_BLACK, " ");
     var thisObject = this;
-    this.button.connectFunc(function(){
-      if (thisObject.char === " "){
+    this.button.connectFunc(function() {
+      if (thisObject.char === " ") {
         thisObject.char = "X";
-      }else{
+      } else {
         thisObject.char = " ";
       }
     });
   }
 
-  startAnimation(){
+  startAnimation() {
     this.animationDone = false;
     this.fontSize = 0;
   }
 
-  animate(){
+  animate() {
 
   }
 
-  display(bgColor, textColor){
+  display(bgColor, textColor) {
     push();
-    translate(this.posX * MAX_NOTE_SIZE/CHAR_WIDTH, this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT);
+    translate(this.posX * MAX_NOTE_SIZE / CHAR_WIDTH, this.posY * MAX_NOTE_SIZE / CHAR_HEIGHT);
     rectMode(CORNER);
 
-    if (this.button != null){
+    if (this.button != null) {
       this.button.display();
     }
 
-    if (!this.animationDone){
+    if (!this.animationDone) {
       this.animate();
     }
-
-    if (this.highlight){
+    // highlight
+    if (this.highlight) {
       fill(this.highlightColor);
-      rect(0,this.UNDERLINE_WEIGHT/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT - this.UNDERLINE_WEIGHT);
-    }else{
-      fill(255,255,255,0);
-      rect(0,0, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT);
+      rect(0, this.UNDERLINE_WEIGHT / 2, MAX_NOTE_SIZE / CHAR_WIDTH, MAX_NOTE_SIZE / CHAR_HEIGHT - this.UNDERLINE_WEIGHT);
+    } else {
+      fill(255, 255, 255, 0);
+      rect(0, 0, MAX_NOTE_SIZE / CHAR_WIDTH, MAX_NOTE_SIZE / CHAR_HEIGHT);
     }
-
-    if (this.underline){
+    //underline
+    if (this.underline) {
       fill(this.underlineColor);
-      rect(0, MAX_NOTE_SIZE/CHAR_HEIGHT - this.UNDERLINE_WEIGHT/2, MAX_NOTE_SIZE/CHAR_WIDTH, this.UNDERLINE_WEIGHT);
+      rect(0, MAX_NOTE_SIZE / CHAR_HEIGHT - this.UNDERLINE_WEIGHT / 2, MAX_NOTE_SIZE / CHAR_WIDTH, this.UNDERLINE_WEIGHT);
     }
-
-    if (checkForMouseOver(windowWidth/2-MAX_NOTE_SIZE/2 + this.posX * MAX_NOTE_SIZE/CHAR_WIDTH + (MAX_NOTE_SIZE/CHAR_WIDTH)/2, TOP_MENU_HEIGHT/2 + this.posY * MAX_NOTE_SIZE/CHAR_HEIGHT + (MAX_NOTE_SIZE/CHAR_HEIGHT)/2, MAX_NOTE_SIZE/CHAR_WIDTH, MAX_NOTE_SIZE/CHAR_HEIGHT) && (this.underlineEnabled || this.highlightEnabled)){
-      if (charGrid.theme === 1){
+    // if markup tool is enabled, display a blue tint when hovered
+    if (checkForMouseOver(windowWidth / 2 - MAX_NOTE_SIZE / 2 + this.posX * MAX_NOTE_SIZE / CHAR_WIDTH + (MAX_NOTE_SIZE / CHAR_WIDTH) / 2, TOP_MENU_HEIGHT / 2 + this.posY * MAX_NOTE_SIZE / CHAR_HEIGHT + (MAX_NOTE_SIZE / CHAR_HEIGHT) / 2, MAX_NOTE_SIZE / CHAR_WIDTH, MAX_NOTE_SIZE / CHAR_HEIGHT) && (this.underlineEnabled || this.highlightEnabled)) {
+      if (charGrid.theme === 1) {
         fill(textColor);
-      }else{
-        fill(0,100,255,50);
+      } else {
+        fill(0, 100, 255, 50);
       }
-      rect(-2,0, MAX_NOTE_SIZE/CHAR_WIDTH + 4, MAX_NOTE_SIZE/CHAR_HEIGHT);
-
-      if (mouseIsPressed){
-        if (this.pressTime < 1){
+      rect(-2, 0, MAX_NOTE_SIZE / CHAR_WIDTH + 4, MAX_NOTE_SIZE / CHAR_HEIGHT);
+      // if clicked
+      if (mouseIsPressed) {
+        if (this.pressTime < 1) {
           this.pressTime += 1;
-          if (this.underlineEnabled){
+          // underline
+          if (this.underlineEnabled) {
             this.underline = !this.underline;
-            if (charGrid.theme != 1){
+            // if theme is not terminal
+            if (charGrid.theme != 1) {
               this.underlineColor = PEN_COLORS[penColorIndex];
-            }else{
+            } else {
               this.underlineColor = textColor;
             }
           }
-          if (this.highlightEnabled){
+          // highlight
+          if (this.highlightEnabled) {
             this.highlight = !this.highlight;
-            if (charGrid.theme != 1){
+            // if theme is not terminal
+            if (charGrid.theme != 1) {
               this.highlightColor = HIGHLIGHT_COLORS[highlighColorIndex];
-            }else{
+            } else {
               this.highlightColor = textColor;
             }
-
           }
         }
-      }else{
+      // reset
+      } else {
         this.pressTime = 0;
       }
-    }else{
+    // if mouse moves away, reset
+    } else {
       this.pressTime = 0;
     }
     // special case: terminal
-    if (charGrid.theme === 1 && this.highlight){
+    if (charGrid.theme === 1 && this.highlight) {
       fill(bgColor);
-    }else{
+    } else {
       fill(textColor);
     }
     textAlign(CENTER, CENTER);
     textSize(FONT_SIZE);
-    text(this.char, MAX_NOTE_SIZE/CHAR_WIDTH/2, MAX_NOTE_SIZE/CHAR_HEIGHT/2);
+    text(this.char, MAX_NOTE_SIZE / CHAR_WIDTH / 2, MAX_NOTE_SIZE / CHAR_HEIGHT / 2);
     pop();
   }
 }

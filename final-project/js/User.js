@@ -1,5 +1,6 @@
-class User{
-  constructor(){
+// user object to store user data
+class User {
+  constructor() {
     this.info = {
       level: 1,
       xp: 0,
@@ -12,8 +13,8 @@ class User{
     };
   }
 
-  update(key, value){
-    if (key in this.info){
+  update(key, value) {
+    if (key in this.info) {
       this.info[key] = value;
     }
   }

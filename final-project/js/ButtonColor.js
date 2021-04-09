@@ -1,5 +1,6 @@
-class ButtonColor extends Button{
-  constructor(posX, posY, width, colorProfile, colorIndex, icon = null){
+// a button displays and controls color
+class ButtonColor extends Button {
+  constructor(posX, posY, width, colorProfile, colorIndex, icon = null) {
     super(posX, posY, width, width);
 
     this.icon = icon;
@@ -9,68 +10,68 @@ class ButtonColor extends Button{
     this.colorIndex = colorIndex;
   }
 
-// button style
-  normalStyle(){
+  // button style
+  normalStyle() {
     this.drawStroke();
     this.fillWithoutAlpha();
     ellipse(this.posX, this.posY, this.width);
   }
 
-// button style when hovered
-  hoverStyle(){
-    fill(255,255,255,50);
+  // button style when hovered
+  hoverStyle() {
+    fill(255, 255, 255, 50);
     ellipse(this.posX, this.posY, this.width * 1.4);
     this.drawStroke();
     this.fillWithoutAlpha();
     ellipse(this.posX, this.posY, this.width);
   }
 
-// button style when clicked
-  clickStyle(){
-    fill(255,255,255,75);
+  // button style when clicked
+  clickStyle() {
+    fill(255, 255, 255, 75);
     ellipse(this.posX, this.posY, this.width * 1.4);
     this.drawStroke();
     this.fillWithoutAlpha();
     ellipse(this.posX, this.posY, this.width);
   }
 
-  fillWithoutAlpha(){
+  fillWithoutAlpha() {
     let color = this.colorProfile[this.colorIndex];
-    if (color.length === 9){
-      color = color.substring(0,7);
+    if (color.length === 9) {
+      color = color.substring(0, 7);
     }
     fill(color);
   }
 
-  drawStroke(){
+  drawStroke() {
     stroke(COLOR_WHITE);
-    if (this.icon != null){
+    if (this.icon != null) {
       strokeWeight(2);
-    }else{
+    } else {
       strokeWeight(3);
     }
   }
 
-  display(){
+  display() {
     this.checkForMouse();
     push();
     rectMode(CENTER);
     ellipseMode(CENTER);
     imageMode(CENTER);
-    if (this.isHovered){
-      if (this.mouseClicked){
+    if (this.isHovered) {
+      if (this.mouseClicked) {
         this.clickStyle();
-      }else{
+      } else {
         this.hoverStyle();
       }
-    }else{
+    } else {
       this.normalStyle();
     }
     noStroke();
-    if (this.icon != null){
+    if (this.icon != null) {
       image(this.icon, this.posX, this.posY, this.iconSize, this.iconSize);
     }
-    if (this.disabled){
+    if (this.disabled) {
       push();
       translate(this.posX, this.posY);
       angleMode(DEGREES);
@@ -78,7 +79,7 @@ class ButtonColor extends Button{
       strokeWeight(2.5);
       fill(COLOR_WHITE);
       rotate(-45);
-      rect(0,0, this.width * 1.5, 5, 32);
+      rect(0, 0, this.width * 1.5, 5, 32);
       pop();
     }
     pop();
