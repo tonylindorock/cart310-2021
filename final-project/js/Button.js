@@ -26,7 +26,7 @@ class Button{
 
   checkForMouse(){
     if (checkForMouseOver(this.posX, this.posY, this.width, this.height) && selectedItem.type === "" && !this.disabled){
-      cursor(HAND);
+      //cursor(HAND);
       this.isHovered = true;
 
       // show tooltip when hovered for 2s
@@ -56,7 +56,7 @@ class Button{
 
     }else{
       if (this.isHovered){
-        cursor(ARROW);
+        //cursor(ARROW);
         clearTimeout(this.hoverTimeout);
         this.hoverTimeout = null;
         isShowingTooltip = false;

@@ -16,6 +16,8 @@ class CharGrid {
     this.pointerPosX = 0;
     this.pointerPosY = 0;
 
+    this.tempPointPosX = this.pointerPosX;
+
     this.MAX_SIZE = 600;
 
     this.underlineEnabled = false;
@@ -55,9 +57,13 @@ class CharGrid {
     }
     // if can add a character
     if (valid) {
+      this.keyIsTyped = true;
       let newChar = new Character(this.pointerPosX, this.pointerPosY, character, special);
       newChar.underlineEnabled = this.underlineEnabled;
       newChar.highlightEnabled = this.highlightEnabled;
+      if (this.theme === 0){
+        newChar.startAnimation();
+      }
       this.lines[this.pointerPosY] = this.lines[this.pointerPosY] + character;
       this.characters[this.pointerPosY].push(newChar);
       //console.log(character + " New char added at "+ this.pointerPosX + " " + this.pointerPosY);
@@ -89,17 +95,21 @@ class CharGrid {
     } else {
       console.log("Cannot add checkbox.");
     }
+    this.keyIsTyped = true;
   }
   // remove a character
   removeChar() {
+    this.keyIsTyped = true;
     if (this.pointerPosX === 0) {
       if (this.pointerPosY > 0) {
         this.pointerPosY -= 1;
         this.lines.pop();
         this.characters.pop();
       }
+      this.tempPointPosX = this.pointerPosX;
       this.pointerPosX = this.lines[this.pointerPosY].length;
     } else {
+      this.tempPointPosX = this.pointerPosX;
       this.pointerPosX -= 1;
       let temp = this.lines[this.pointerPosY];
       this.lines[this.pointerPosY] = temp.substring(0, temp.length - 1);
@@ -146,14 +156,28 @@ class CharGrid {
     } else {
       noFill();
     }
+    if(this.theme === 0){
+      this.tempPointPosX = lerp(this.tempPointPosX, this.pointerPosX, 0.4);
+    }else{
+      this.tempPointPosX = this.pointerPosX;
+    }
     // if theme is not terminal, display a thinner one
     if (this.theme != 1) {
-      rect(this.pointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, 3, MAX_NOTE_SIZE / CHAR_HEIGHT);
+      rect(this.tempPointPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, 3, MAX_NOTE_SIZE / CHAR_HEIGHT);
     // display a thicker one
     } else {
-      rect(this.pointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, MAX_NOTE_SIZE / CHAR_WIDTH * 0.8, MAX_NOTE_SIZE / CHAR_HEIGHT);
+      rect(this.tempPointPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, MAX_NOTE_SIZE / CHAR_WIDTH * 0.8, MAX_NOTE_SIZE / CHAR_HEIGHT);
     }
     pop();
+  }
+
+  updateMarkupColor(){
+    for (let i = 0; i < this.characters.length; i++) {
+      for (let j = 0; j < this.characters[i].length; j++) {
+        this.characters[i][j].underlineColor = this.textColor;
+        this.characters[i][j].highlightColor = this.textColor;
+      }
+    }
   }
 
   display() {

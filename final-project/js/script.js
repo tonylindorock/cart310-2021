@@ -86,7 +86,8 @@ let ICON_CHECKBOX;
 let ICON_TEXTCOLOR;
 let ICON_BGCOLOR;
 
-let STICKER_ONE_HUNDREN;
+let AWARD_FIRST_USE;
+let AWARD_ONE_HUNDREN;
 // ********************************
 
 let currentItemIndex = 0;
@@ -169,7 +170,8 @@ function preload() {
   ICON_TEXTCOLOR = loadImage("assets/images/icon_text.png");
   ICON_BGCOLOR = loadImage("assets/images/icon_bg.png");
 
-  STICKER_ONE_HUNDREN = loadImage("assets/images/sticker_100.png");
+  AWARD_ONE_HUNDREN = loadImage("assets/images/award_100.png");
+  AWARD_FIRST_USE = loadImage("assets/images/award_firstuse.png");
 }
 
 // setup main screen
@@ -230,9 +232,9 @@ function setupMainMenuBtns() {
   let downSizeRatio = 1.75;
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
-  btnPlayful.disabled = true;
+  //btnPlayful.disabled = true;
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
-  btnTerminal.disabled = true;
+  //btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
   btnPlain.connectFunc(function() {
     createNote(2);
@@ -263,7 +265,11 @@ function connectEditorBtns() {
   // close note
   btnClose.connectFunc(function() {
     editingNote = false;
+    btnUnderline.func();
+    btnHighlight.func();
     updateNoteThumbnail();
+    resizeCanvas(windowWidth, windowHeight*2);
+    resetUserStatisticsAnimation();
   });
   // share function
   btnShare.connectFunc(function() {
@@ -330,6 +336,9 @@ function connectEditorBtns() {
       btnTextColor.colorIndex = 0;
     }
     charGrid.textColor = btnTextColor.colorProfile[btnTextColor.colorIndex];
+    if (charGrid.theme === 1){
+      charGrid.updateMarkupColor();
+    }
   });
 }
 
@@ -358,7 +367,7 @@ function setupFirstUse() {
   }
   let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
   let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
-  let magnet = new DraggableAward(rX, rY, COLOR_RED, STICKER_ONE_HUNDREN, noteThumbnailContainer.length);
+  let magnet = new DraggableAward(rX, rY, COLOR_RED, AWARD_FIRST_USE, noteThumbnailContainer.length);
   magnetContainer.push(magnet);
 }
 
@@ -584,6 +593,14 @@ function displayChallenages(){
   pop();
 }
 
+function resetUserStatisticsAnimation(){
+  displayLevelHeight = 0;
+  scrolledDown = false;
+  for (let i = 0; i < infoArray.length; i++) {
+    infoArray[i].reset();
+  }
+}
+
 // update dragged item
 function updateSelectedItem(type, id) {
   selectedItem.type = type;
@@ -712,12 +729,10 @@ function keyPressed() {
     // delete
     if (keyCode === 8) {
       charGrid.removeChar();
-      charGrid.keyIsTyped = true;
     }
     // return
     if (keyCode === 13) {
       charGrid.addChar("\n");
-      charGrid.keyIsTyped = true;
     }
   }
 }
@@ -727,7 +742,6 @@ function keyTyped() {
   if (editingNote) {
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
-      charGrid.keyIsTyped = true;
     }
   }
   if (keyCode === 8){

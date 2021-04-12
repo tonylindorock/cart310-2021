@@ -15,6 +15,7 @@ class Character {
     this.posY = y;
     this.size = 1;
     this.FONT_SIZE = 30;
+    this.fontSize = this.FONT_SIZE;
     this.UNDERLINE_WEIGHT = 3;
 
     this.underlineEnabled = false;
@@ -23,6 +24,7 @@ class Character {
     this.pressTime = 0;
 
     this.animationDone = true;
+    this.animationId = 0;
 
     this.globalX = windowWidth / 2 - MAX_NOTE_SIZE / 2 + this.posX * MAX_NOTE_SIZE / CHAR_WIDTH + (MAX_NOTE_SIZE / CHAR_WIDTH) / 2;
     this.globalY = TOP_MENU_HEIGHT / 2 + this.posY * MAX_NOTE_SIZE / CHAR_HEIGHT + (MAX_NOTE_SIZE / CHAR_HEIGHT) / 2;
@@ -50,7 +52,10 @@ class Character {
   }
 
   animate() {
-
+    this.fontSize = lerp(this.fontSize, this.FONT_SIZE, 0.3);
+    if (Math.round(this.fontSize) === this.FONT_SIZE){
+      this.animationDone = true;
+    }
   }
 
   display(bgColor, textColor) {
@@ -126,7 +131,7 @@ class Character {
       fill(textColor);
     }
     textAlign(CENTER, CENTER);
-    textSize(FONT_SIZE);
+    textSize(this.fontSize);
     text(this.char, MAX_NOTE_SIZE / CHAR_WIDTH / 2, MAX_NOTE_SIZE / CHAR_HEIGHT / 2);
     pop();
   }

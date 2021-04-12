@@ -16,6 +16,11 @@ class InfoSquare {
     this.MARGIN = 24;
   }
 
+  reset(){
+    this.displayVal = 0;
+    this.scrolledDown = false;
+  }
+
   display(translateX, translateY) {
     push();
     rectMode(CORNER);

@@ -48,11 +48,13 @@ class ButtonText extends Button {
     textAlign(CENTER, CENTER);
     textSize(16);
     if (this.isHovered) {
+      cursor(HAND);
       this.hoverStyle();
       if (this.mouseClicked) {
         this.clickStyle();
       }
     } else {
+      cursor(ARROW);
       this.normalStyle();
     }
     text(this.text, this.posX, this.posY);

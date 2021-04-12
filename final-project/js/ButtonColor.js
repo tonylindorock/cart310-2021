@@ -45,11 +45,7 @@ class ButtonColor extends Button {
 
   drawStroke() {
     stroke(COLOR_WHITE);
-    if (this.icon != null) {
-      strokeWeight(2);
-    } else {
-      strokeWeight(3);
-    }
+    strokeWeight(3);
   }
 
   display() {
