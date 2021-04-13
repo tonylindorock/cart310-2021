@@ -16,7 +16,8 @@ class CharGrid {
     this.pointerPosX = 0;
     this.pointerPosY = 0;
 
-    this.tempPointPosX = this.pointerPosX;
+    this.tempPointerPosX = this.pointerPosX;
+    this.tempPointerPosY = this.pointerPosY;
 
     this.MAX_SIZE = 600;
 
@@ -24,6 +25,9 @@ class CharGrid {
     this.highlightEnabled = false;
 
     this.keyIsTyped = false;
+
+    this.returnAnimDone = true;
+    this.returnAnimH = MAX_NOTE_SIZE/CHAR_HEIGHT;
 
     this.setup();
   }
@@ -157,16 +161,46 @@ class CharGrid {
       noFill();
     }
     if(this.theme === 0){
-      this.tempPointPosX = lerp(this.tempPointPosX, this.pointerPosX, 0.4);
+      this.tempPointerPosX = lerp(this.tempPointerPosX, this.pointerPosX, 0.4);
+      this.tempPointerPosY = lerp(this.tempPointerPosY, this.pointerPosY, 0.2);
     }else{
-      this.tempPointPosX = this.pointerPosX;
+      this.tempPointerPosX = this.pointerPosX;
+      this.tempPointerPosY = this.pointerPosY;
     }
     // if theme is not terminal, display a thinner one
     if (this.theme != 1) {
-      rect(this.tempPointPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, 3, MAX_NOTE_SIZE / CHAR_HEIGHT);
+      rect(this.tempPointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.tempPointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, 3, MAX_NOTE_SIZE / CHAR_HEIGHT);
     // display a thicker one
     } else {
-      rect(this.tempPointPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, MAX_NOTE_SIZE / CHAR_WIDTH * 0.8, MAX_NOTE_SIZE / CHAR_HEIGHT);
+      rect(this.tempPointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.tempPointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, MAX_NOTE_SIZE / CHAR_WIDTH * 0.8, MAX_NOTE_SIZE / CHAR_HEIGHT);
+    }
+    pop();
+  }
+
+  displayScanLines(){
+    // draw scanlines for terminal
+    push();
+    translate(windowWidth / 2 - this.MAX_SIZE / 2, TOP_MENU_HEIGHT / 2);
+    if (this.theme === 1) {
+      for (let i = 0; i < this.scanLineCount; i++) {
+        fill(0, 0, 0, 50);
+        rect(-16, i * (this.MAX_SIZE + 32) / this.scanLineCount - 16, this.MAX_SIZE + 32, (this.MAX_SIZE + 32) / (this.scanLineCount * 2));
+      }
+    }
+    pop();
+  }
+
+  playReturnPressedAnimation(){
+    push();
+    translate(0, TOP_MENU_HEIGHT / 2);
+    if (!this.returnAnimDone){
+      this.returnAnimH = lerp(this.returnAnimH, 0, 0.2);
+      fill(COLOR_WHITE);
+      rect(this.pointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT + this.returnAnimH/2, windowWidth, this.returnAnimH);
+
+      if (Math.round(this.returnAnimH) === 0){
+        this.returnAnimDone = true;
+      }
     }
     pop();
   }
@@ -218,15 +252,11 @@ class CharGrid {
 
     this.displayPointer();
 
-    // draw scanlines for terminal
-    push();
-    translate(windowWidth / 2 - this.MAX_SIZE / 2, TOP_MENU_HEIGHT / 2);
-    if (this.theme === 1) {
-      for (let i = 0; i < this.scanLineCount; i++) {
-        fill(0, 0, 0, 50);
-        rect(-16, i * (this.MAX_SIZE + 32) / this.scanLineCount - 16, this.MAX_SIZE + 32, (this.MAX_SIZE + 32) / (this.scanLineCount * 2));
-      }
+    if (this.theme === 1){
+      this.displayScanLines();
     }
-    pop();
+    if (this.theme === 0){
+      this.playReturnPressedAnimation();
+    }
   }
 }

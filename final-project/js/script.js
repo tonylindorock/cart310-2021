@@ -11,10 +11,6 @@ FONTS FROM:
 https://www.1001fonts.com/goldie-boxing-font.html
 https://webfonts.ffonts.net/04b03.font.download
 
-SOUNDS:
-delete from Youtube Studio
-https://studio.youtube.com/channel/UCEojCq6FAl7p1TNyou5GI6Q/music
-
 ******************/
 
 const CHAR_WIDTH = 34;
@@ -225,7 +221,7 @@ function draw() {
 }
 
 function setupSounds(){
-  SFX_DELETE.setVolume(0.3);
+  SFX_DELETE.setVolume(0.2);
   let typingVol = 0.08;
   SFX_TYPING_0.setVolume(typingVol);
   SFX_TYPING_1.setVolume(typingVol);
@@ -260,8 +256,14 @@ function setupMainMenuBtns() {
   let downSizeRatio = 1.75;
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
+  btnPlayful.connectFunc(function() {
+    createNote(0);
+  });
   //btnPlayful.disabled = true;
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
+  btnTerminal.connectFunc(function() {
+    createNote(1);
+  });
   //btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
   btnPlain.connectFunc(function() {
@@ -685,8 +687,8 @@ function createNote(theme) {
         newNoteThumbnail = new DraggableNote(rX, rY, COLOR_YELLOW_PASTEL, COLOR_BLACK, theme, "", randId);
         break;
       case 1:
-        newNote = new CharGrid(theme, COLOR_BLACK, COLOR_ORNAGE, randId);
-        newNoteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, COLOR_ORNAGE, theme, "", randId);
+        newNote = new CharGrid(theme, COLOR_BLACK, COLOR_ORANGE, randId);
+        newNoteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, COLOR_ORANGE, theme, "", randId);
         break;
       case 2:
         newNote = new CharGrid(theme, COLOR_WHITE, COLOR_BLACK, randId);
@@ -775,6 +777,11 @@ function keyPressed() {
     if (keyCode === 13) {
       charGrid.addChar("\n");
       playTypingSound(0);
+      /*
+      if (charGrid.theme === 0){
+        charGrid.returnAnimH = MAX_NOTE_SIZE/CHAR_HEIGHT;
+        charGrid.returnAnimDone = false;
+      }*/
     }
     if (keyCode === 32){
       playTypingSound(0);
