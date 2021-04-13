@@ -180,6 +180,14 @@ class CharGrid {
     }
   }
 
+  resetAnimation(){
+    for (let i = 0; i < this.characters.length; i++) {
+      for (let j = 0; j < this.characters[i].length; j++) {
+        this.characters[i][j].startAnimation();
+      }
+    }
+  }
+
   display() {
     push();
     // draw frame for terminal

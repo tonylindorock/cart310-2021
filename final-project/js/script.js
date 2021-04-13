@@ -11,6 +11,10 @@ FONTS FROM:
 https://www.1001fonts.com/goldie-boxing-font.html
 https://webfonts.ffonts.net/04b03.font.download
 
+SOUNDS:
+delete from Youtube Studio
+https://studio.youtube.com/channel/UCEojCq6FAl7p1TNyou5GI6Q/music
+
 ******************/
 
 const CHAR_WIDTH = 34;
@@ -88,6 +92,13 @@ let ICON_BGCOLOR;
 
 let AWARD_FIRST_USE;
 let AWARD_ONE_HUNDREN;
+
+let SFX_DELETE;
+let SFX_TYPING_0;
+let SFX_TYPING_1;
+let SFX_TYPING_2;
+let SFX_TYPING_3;
+let SFX_BEEP;
 // ********************************
 
 let currentItemIndex = 0;
@@ -172,15 +183,22 @@ function preload() {
 
   AWARD_ONE_HUNDREN = loadImage("assets/images/award_100.png");
   AWARD_FIRST_USE = loadImage("assets/images/award_firstuse.png");
+
+  SFX_DELETE = loadSound("assets/sounds/delete.mp3");
+  SFX_TYPING_0 = loadSound("assets/sounds/typing_1.mp3");
+  SFX_TYPING_1 = loadSound("assets/sounds/typing_2.mp3");
+  SFX_TYPING_2 = loadSound("assets/sounds/typing_3.mp3");
+  SFX_TYPING_3 = loadSound("assets/sounds/typing_4.mp3");
+  SFX_BEEP = loadSound("assets/sounds/beep.mp3");
 }
 
 // setup main screen
 function setup() {
-
   createCanvas(windowWidth, windowHeight * 2);
   noStroke();
 
   setupUser();
+  setupSounds();
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
@@ -204,6 +222,16 @@ function draw() {
   if (isShowingTooltip) {
     displayTooltip();
   }
+}
+
+function setupSounds(){
+  SFX_DELETE.setVolume(0.3);
+  let typingVol = 0.08;
+  SFX_TYPING_0.setVolume(typingVol);
+  SFX_TYPING_1.setVolume(typingVol);
+  SFX_TYPING_2.setVolume(typingVol);
+  SFX_TYPING_3.setVolume(typingVol);
+  SFX_BEEP.setVolume(0.1);
 }
 
 function setupUser() {
@@ -246,17 +274,22 @@ function setupNoteEditorBtns() {
   // top left corner
   btnClose = new ButtonIcon(64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CLOSE);
   btnShare = new ButtonIcon(128, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_SHARE);
-  btnShare.tooltip = "HAVE THE NOTE READY TO COPY";
+  btnShare.tooltip = "READY TO COPY THE NOTE";
   // bottom center left
   btnCheckbox = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_CHECKBOX, false);
   btnCheckbox.tooltip = "ADD A CHECKBOX";
   btnUnderline = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 64, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_UNDERLINE, true);
+  btnUnderline.tooltip = "UNDERLINE";
   btnHighlight = new ButtonIcon(windowWidth / 2 - MAX_NOTE_SIZE / 2 + 128, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_HIGHLIGHT, true);
+  btnHighlight.tooltip = "HIGHLIGHT";
   // bottom center right
   btnMarkupColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2 - 48, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, PEN_COLORS, 0);
   btnMarkupColor.disabled = true;
+  btnMarkupColor.tooltip = "MARKUP COLOR";
   btnBgColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_BGCOLOR);
+  btnBgColor.tooltip = "BACKGROUND COLOR";
   btnTextColor = new ButtonColor(windowWidth / 2 + MAX_NOTE_SIZE / 2, windowHeight - TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, COLORS_NOTE_PLAYFUL, 1, ICON_TEXTCOLOR);
+  btnTextColor.tooltip = "TEXT COLOR";
 
   connectEditorBtns();
 }
@@ -265,8 +298,6 @@ function connectEditorBtns() {
   // close note
   btnClose.connectFunc(function() {
     editingNote = false;
-    btnUnderline.func();
-    btnHighlight.func();
     updateNoteThumbnail();
     resizeCanvas(windowWidth, windowHeight*2);
     resetUserStatisticsAnimation();
@@ -281,6 +312,9 @@ function connectEditorBtns() {
   // check box function
   btnCheckbox.connectFunc(function() {
     charGrid.addCheckButton();
+    if (charGrid.theme === 1){
+      SFX_BEEP.play();
+    }
   });
   // underline function
   btnUnderline.connectFunc(function() {
@@ -300,6 +334,7 @@ function connectEditorBtns() {
     btnMarkupColor.colorProfile = HIGHLIGHT_COLORS;
     btnMarkupColor.colorIndex = highlighColorIndex;
   });
+
   btnMarkupColor.connectFunc(function() {
     if (btnMarkupColor.colorIndex < btnMarkupColor.colorProfile.length - 1) {
       btnMarkupColor.colorIndex += 1;
@@ -312,6 +347,7 @@ function connectEditorBtns() {
       highlighColorIndex = btnMarkupColor.colorIndex;
     }
   });
+
   btnBgColor.connectFunc(function() {
     if (btnBgColor.colorIndex < btnBgColor.colorProfile.length - 1) {
       btnBgColor.colorIndex += 1;
@@ -328,7 +364,6 @@ function connectEditorBtns() {
       charGrid.textColor = btnTextColor.colorProfile[btnTextColor.colorIndex];
     }
   });
-
   btnTextColor.connectFunc(function() {
     if (btnTextColor.colorIndex < btnTextColor.colorProfile.length - 1) {
       btnTextColor.colorIndex += 1;
@@ -634,6 +669,8 @@ function deleteNote(id) {
   console.log("\"" + removeFromArrayByItemId(noteThumbnailContainer, id).title + "\" is deleted.");
   trashAnim.deleteDone = true;
   hoveredDraggables = [];
+
+  SFX_DELETE.play();
 }
 
 function createNote(theme) {
@@ -667,24 +704,27 @@ function openNote(id) {
   for (let i = 0; i < noteContainer.length; i++) {
     if (id === noteContainer[i].id) {
       charGrid = noteContainer[i];
+      // update buttons for different themes
+      switch (charGrid.theme) {
+        case 0:
+          btnBgColor.colorProfile = COLORS_NOTE_PLAYFUL;
+          btnBgColor.colorIndex = COLORS_NOTE_PLAYFUL.indexOf(charGrid.bgColor);
+          charGrid.resetAnimation();
+          break;
+        case 1:
+          btnTextColor.posX = windowWidth / 2 + MAX_NOTE_SIZE / 2;
+          btnTextColor.colorProfile = COLORS_THEME;
+          btnTextColor.colorIndex = COLORS_THEME.indexOf(charGrid.textColor);
+          break;
+        case 2:
+          btnBgColor.colorProfile = COLORS_NOTE_PLAIN;
+          btnBgColor.colorIndex = COLORS_NOTE_PLAIN.indexOf(charGrid.bgColor);
+          btnTextColor.colorProfile = COLORS_NOTE_PLAIN;
+          btnTextColor.colorIndex = COLORS_NOTE_PLAIN.indexOf(charGrid.textColor);
+      }
+      charGrid.toggleHighlight(btnHighlight.toggled);
+      charGrid.toggleUnderline(btnUnderline.toggled);
     }
-  }
-  // update buttons for different themes
-  switch (charGrid.theme) {
-    case 0:
-      btnBgColor.colorProfile = COLORS_NOTE_PLAYFUL;
-      btnBgColor.colorIndex = COLORS_NOTE_PLAYFUL.indexOf(charGrid.bgColor);
-      break;
-    case 1:
-      btnTextColor.posX = windowWidth / 2 + MAX_NOTE_SIZE / 2;
-      btnTextColor.colorProfile = COLORS_THEME;
-      btnTextColor.colorIndex = COLORS_THEME.indexOf(charGrid.textColor);
-      break;
-    case 2:
-      btnBgColor.colorProfile = COLORS_NOTE_PLAIN;
-      btnBgColor.colorIndex = COLORS_NOTE_PLAIN.indexOf(charGrid.bgColor);
-      btnTextColor.colorProfile = COLORS_NOTE_PLAIN;
-      btnTextColor.colorIndex = COLORS_NOTE_PLAIN.indexOf(charGrid.textColor);
   }
   editingNote = true;
   resizeCanvas(windowWidth, windowHeight);
@@ -729,10 +769,15 @@ function keyPressed() {
     // delete
     if (keyCode === 8) {
       charGrid.removeChar();
+      playTypingSound();
     }
     // return
     if (keyCode === 13) {
       charGrid.addChar("\n");
+      playTypingSound(0);
+    }
+    if (keyCode === 32){
+      playTypingSound(0);
     }
   }
 }
@@ -742,17 +787,31 @@ function keyTyped() {
   if (editingNote) {
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
+      playTypingSound();
     }
-  }
-  if (keyCode === 8){
-    console.log(selectedItem);
-    console.log(findTopItem());
   }
 }
 
 function mouseWheel(event) {
   if (document.documentElement.scrollTop > windowHeight / 4) {
     scrolledDown = true;
+  }
+}
+
+function playTypingSound(id){
+  if (charGrid.theme === 1){
+    if (id === 0){
+      SFX_TYPING_0.play();
+    }else{
+      let r = random();
+      if (r >= 0.33){
+        SFX_TYPING_1.play();
+      }else if (r >= 0.66){
+        SFX_TYPING_2.play();
+      }else{
+        SFX_TYPING_3.play();
+      }
+    }
   }
 }
 
