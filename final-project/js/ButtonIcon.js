@@ -7,6 +7,13 @@ class ButtonIcon extends Button {
     this.iconSize = height * 0.75;
 
     this.CORNER_RADIUS = 8;
+
+    this.rotation = 0;
+    this.RAND_ROTATE = 12;
+  }
+
+  rotateIcon(){
+    this.rotation = random(-this.RAND_ROTATE, this.RAND_ROTATE);
   }
 
   // button style
@@ -37,6 +44,7 @@ class ButtonIcon extends Button {
     push();
     rectMode(CENTER);
     imageMode(CENTER);
+    angleMode(DEGREES);
     if (this.isHovered || (this.toggleMode && this.toggled)) {
       if (this.mouseClicked) {
         this.clickStyle();
@@ -46,10 +54,14 @@ class ButtonIcon extends Button {
     } else {
       this.normalStyle();
     }
-    image(this.icon, this.posX, this.posY, this.iconSize, this.iconSize);
+    push();
+    translate(this.posX, this.posY);
+    rotate(this.rotation);
+    image(this.icon, 0,0, this.iconSize, this.iconSize);
     if (this.disabled) {
-      image(ICON_DISABLED, this.posX, this.posY, this.width / 2, this.width / 2);
+      image(ICON_DISABLED, 0,0, this.width / 2, this.width / 2);
     }
+    pop();
     if (this.showingTooltip) {
       this.showTooltip();
     }

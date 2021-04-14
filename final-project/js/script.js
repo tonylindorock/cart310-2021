@@ -24,7 +24,7 @@ const AWARD_SIZE = 100;
 const AWARD_ICON_SIZE = 64;
 
 const MARGIN = 32;
-const TOP_MENU_HEIGHT = 84;
+let TOP_MENU_HEIGHT = 84;
 
 const ADD_MENU_WIDTH = 320;
 const ADD_MENU_HEIGHT = 160;
@@ -88,6 +88,9 @@ let ICON_BGCOLOR;
 
 let AWARD_FIRST_USE;
 let AWARD_ONE_HUNDREN;
+let AWARD_ROCKET;
+
+let GIFT_ROCKET;
 
 let SFX_DELETE;
 let SFX_TYPING_0;
@@ -112,13 +115,21 @@ let trashAnim = {
   angleSpeed: 0.1,
   angle: -90
 };
+let giftShop = {
+  item0Sold: false,
+  item1Sold: false,
+  item0Price: 60,
+  item1Price: 60,
+  item0: null,
+  item1: null
+}
 
 let showAddMenu = false;
 let editingNote = false;
 let isShowingTooltip = false;
 let currentTooltip = "";
 
-let displayLevelHeight = 0;
+let displayCoinHeight = 0;
 let scrollPos = 0;
 let scrolledDown = false;
 
@@ -131,7 +142,7 @@ let noteContainer = [];
 
 let user;
 let charGrid;
-let levelProgress;
+let coinProgress;
 
 let infoTypedKeys;
 let infoCheckedBoxes;
@@ -145,6 +156,9 @@ let btnAdd;
 let btnPlayful;
 let btnTerminal;
 let btnPlain;
+
+let btnGift0;
+let btnGift1;
 
 let btnClose;
 let btnShare;
@@ -180,6 +194,9 @@ function preload() {
 
   AWARD_ONE_HUNDREN = loadImage("assets/images/award_100.png");
   AWARD_FIRST_USE = loadImage("assets/images/award_firstuse.png");
+  AWARD_ROCKET = loadImage("assets/images/award_rocket.png");
+
+  GIFT_ROCKET = loadImage("assets/images/gift_rocket.png");
 
   SFX_DELETE = loadSound("assets/sounds/delete.mp3");
   SFX_TYPING_0 = loadSound("assets/sounds/typing_1.mp3");
@@ -194,6 +211,8 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight * 2);
   noStroke();
+
+  TOP_MENU_HEIGHT = windowHeight/8.5;
 
   setupUser();
   setupSounds();
@@ -235,14 +254,55 @@ function setupSounds() {
 
 function setupUser() {
   user = new User();
-  levelProgress = new Progress(0, 5, nextLevelXp(1));
+  coinProgress = new Progress(0, 60, 99);
+
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
   infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
   infoSpaceEfficiency = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, 0, "Use of Space", 55, "Efficiency", COLOR_GREEN, "%");
   infoChallengesDone = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN / 2, "Completed", 2, "Challenge(s)", COLOR_ORANGE);
   infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, INFO_SQUARE_SIZE + MARGIN / 2, "Earned", 1, "Magnet(s)", COLOR_PURPLE);
   infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, INFO_SQUARE_SIZE + MARGIN / 2, "User for", 1, "day(s)", COLOR_YELLOW);
+
   infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoChallengesDone, infoMagnets, infoDuration];
+
+  setupGiftShop();
+}
+
+function setupGiftShop(){
+  let translateX = windowWidth/2 + MARGIN;
+  let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
+  let w = INFO_SQUARE_SIZE * 3 + MARGIN;
+  let h = INFO_SQUARE_SIZE * 2 + MARGIN / 2;
+  let size = 160;
+  btnGift0 = new ButtonIcon(translateX + w/2-80-MARGIN/2, translateY + h/2 - MARGIN, size, size, ICON_NOTE_TERMINAL);
+  btnGift0.rotateIcon();
+  btnGift0.connectFunc(function(){
+    if (user.useCoins(giftShop.item0Price)){
+      giftShop.item0Sold = true;
+      btnGift0.disabled = true;
+      btnGift0.forget();
+      giftShop.item0();
+    }
+  });
+  btnGift0.tooltip = "Enable Terminal Note";
+  btnGift1 = new ButtonIcon(translateX + w/2+80+MARGIN/2, translateY + h/2 - MARGIN, size, size, GIFT_ROCKET);
+  btnGift1.rotateIcon();
+  btnGift1.connectFunc(function(){
+    if (user.useCoins(giftShop.item1Price)){
+      giftShop.item1Sold = true;
+      btnGift1.disabled = true;
+      btnGift1.forget();
+      giftShop.item1();
+    }
+  });
+  btnGift1.tooltip = "Obtain a magnet";
+
+  giftShop.item0 = function(){
+    btnTerminal.disabled = false;
+  };
+  giftShop.item1 = function(){
+    addAward(COLOR_RED, AWARD_ROCKET);
+  };
 }
 
 // setup all the main menu buttons
@@ -259,16 +319,19 @@ function setupMainMenuBtns() {
   let downSizeRatio = 1.75;
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
+  btnPlayful.rotateIcon();
   btnPlayful.connectFunc(function() {
     createNote(0);
   });
-  //btnPlayful.disabled = true;
+  btnPlayful.disabled = true;
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
+  btnTerminal.rotateIcon();
   btnTerminal.connectFunc(function() {
     createNote(1);
   });
-  //btnTerminal.disabled = true;
+  btnTerminal.disabled = true;
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
+  btnPlain.rotateIcon();
   btnPlain.connectFunc(function() {
     createNote(2);
   });
@@ -407,7 +470,7 @@ function setupFirstUse() {
   }
   let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
   let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
-  let magnet = new DraggableAward(rX, rY, COLOR_RED, AWARD_FIRST_USE, noteThumbnailContainer.length);
+  let magnet = new DraggableAward(rX, rY, COLOR_RED, AWARD_FIRST_USE, getItemId());
   magnetContainer.push(magnet);
 }
 
@@ -562,47 +625,49 @@ function displayUserInfo() {
   fill(COLOR_BLACK);
   rect(0, windowHeight, windowWidth, windowHeight);
   pop();
-  displayLevel();
+  displayCoins();
   displayStatistics();
-  displayChallenages();
+  displayGiftShop();
 }
 
-function displayLevel() {
+function displayCoins() {
   push();
   rectMode(CENTER);
   textFont(FONT_PLAYFUL);
   translate(windowWidth / 2, windowHeight + TOP_MENU_HEIGHT);
 
-  let width = 96;
-  let progressHeight = levelProgress.getConvertedValue(0, width);
+  let height = 96;
+  let progressHeight = coinProgress.getConvertedValue(0, height);
   // animation
   if (scrolledDown) {
-    displayLevelHeight = lerp(displayLevelHeight, progressHeight, 0.05);
+    displayCoinHeight = lerp(displayCoinHeight, progressHeight, 0.05);
   }
   // visualization
   fill(COLOR_GREY_DARK);
-  rect(-width, 0, width * 1.05, width * 1.05, 8);
+  rect(-height, 0, height * 1.05, height * 1.05, 6);
   stroke(COLOR_GREY_DARK);
   strokeWeight(4);
   fill(COLOR_BLUE);
-  if (displayLevelHeight >= 10) {
-    rect(-width, (width * 1.05) / 2 - displayLevelHeight / 2, width, displayLevelHeight, 8);
+  let tempHeight = Math.round(displayCoinHeight);
+  if (tempHeight >= 12){
+    rect(-height, (height * 1.05) / 2 - tempHeight / 2, height, tempHeight, 6);
   }
+
   // text
   noStroke();
   fill(COLOR_WHITE);
   textAlign(CENTER, CENTER);
   textSize(20);
-  text(user.info.xp + "/" + nextLevelXp(user.info.level), -width, width / 3);
+  text(user.info.coins + "/99", -height, height / 3);
   textAlign(LEFT, CENTER);
   textSize(48);
-  text("Level " + user.info.level, width / 2 - MARGIN, 0);
+  text("Coins", height / 2 - MARGIN, 0);
   pop();
 }
 
 function displayStatistics() {
   push();
-  let translateX = windowWidth / 2 - (INFO_SQUARE_SIZE * 3 + MARGIN * 2);
+  let translateX = windowWidth/2 - (INFO_SQUARE_SIZE * 3 + MARGIN) - MARGIN;
   let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
   translate(translateX, translateY);
   textAlign(LEFT, CENTER);
@@ -617,20 +682,73 @@ function displayStatistics() {
   pop();
 }
 
-function displayChallenages() {
+function displayGiftShop() {
   push();
-  let translateX = windowWidth - (INFO_SQUARE_SIZE * 3 + MARGIN * 6);
+  let translateX = windowWidth/2 + MARGIN;
   let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
+
   translate(translateX, translateY);
   textAlign(LEFT, CENTER);
   textFont(FONT_PLAYFUL);
   fill(COLOR_WHITE);
   textSize(64);
-  text("Challenges", 0, -MARGIN * 2);
+  text("Gift Shop", 0, -MARGIN * 2);
+  // outline
   noFill();
   stroke(COLOR_WHITE);
   strokeWeight(2);
-  rect(0, 0, (INFO_SQUARE_SIZE * 3 + MARGIN), (INFO_SQUARE_SIZE * 2 + MARGIN / 2), 16);
+  let w = INFO_SQUARE_SIZE * 3 + MARGIN;
+  let h = INFO_SQUARE_SIZE * 2 + MARGIN / 2;
+  rect(0, 0, w, h, 16);
+
+  // hint
+  noStroke();
+  textAlign(LEFT, CENTER);
+  fill(COLOR_GREY);
+  textSize(20);
+  text("These items will be available for 7 days", MARGIN/2, h - MARGIN);
+  pop();
+  // items
+  if (!(giftShop.item0Sold && giftShop.item1Sold)){
+    btnGift0.display();
+    btnGift1.display();
+  }
+
+  push();
+  translate(translateX, translateY);
+  angleMode(DEGREES);
+  textFont(FONT_PLAYFUL);
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  fill(COLOR_ORANGE);
+  textSize(24);
+  if (giftShop.item0Sold && giftShop.item1Sold){
+    fill(COLOR_GREY);
+    text("SOLD OUT", w/2, h/2);
+  }else{
+    if(giftShop.item0Sold){
+      push();
+      translate(w/2-80-MARGIN/2, h/2 - 50 + MARGIN/2);
+      rotate(-15);
+      rect(0,0, 100, 48);
+      fill(COLOR_WHITE);
+      text("SOLD", 0,-4);
+      pop();
+    }else{
+      text("60 COINS", w/2 - 100, h/2 + 50 + MARGIN/2);
+    }
+    if(giftShop.item1Sold){
+      push();
+      translate(w/2+80+MARGIN/2, h/2 - 50 + MARGIN/2);
+      rotate(-15);
+      rect(0,0, 100, 48);
+      fill(COLOR_WHITE);
+      text("SOLD", 0,-4);
+      pop();
+    }else{
+      text("60 COINS", w/2 + 100, h/2 + 50 + MARGIN/2);
+    }
+  }
   pop();
 }
 
@@ -741,6 +859,14 @@ function openNote(id) {
   resizeCanvas(windowWidth, windowHeight);
 }
 
+function addAward(color, icon){
+  let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
+  let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
+  let magnet = new DraggableAward(rX, rY, color, icon, getItemId());
+  magnetContainer.push(magnet);
+  console.log("A new magnet is added.");
+}
+
 function updateNoteThumbnail() {
   for (let i = 0; i < noteThumbnailContainer.length; i++) {
     if (charGrid.id === noteThumbnailContainer[i].id) {
@@ -820,9 +946,9 @@ function playTypingSound(id) {
       SFX_TYPING_0.play();
     } else {
       let r = random();
-      if (r >= 0.33) {
+      if (r <= 0.33) {
         SFX_TYPING_1.play();
-      } else if (r >= 0.66) {
+      } else if (0.33 < r && r <= 0.66) {
         SFX_TYPING_2.play();
       } else {
         SFX_TYPING_3.play();
