@@ -40,6 +40,15 @@ class CharGrid {
       this.highlightColor = this.bgColor;
     }
   }
+
+  getSpaceEifficency(){
+    let charNum = 0;
+    for(let i = 0; i < this.lines.length; i++){
+      charNum += this.lines[i].length;
+    }
+    return charNum/(CHAR_WIDTH * CHAR_HEIGHT);
+  }
+
   // return the first line
   getFirstLine() {
     return (this.lines[1] === undefined ? this.lines[0] : this.lines[0].replace("\n", " ") + this.lines[1]);

@@ -40,6 +40,7 @@ class Character {
     this.button.connectFunc(function() {
       if (thisObject.char === " ") {
         thisObject.char = "X";
+        user.info.checkBoxes ++;
       } else {
         thisObject.char = " ";
       }

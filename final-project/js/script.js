@@ -119,7 +119,9 @@ let giftShop = {
   item0Sold: false,
   item1Sold: false,
   item0Price: 60,
-  item1Price: 60,
+  item1Price: 40,
+  item0Des: "Enable Terminal Note",
+  item1Des: "Obtain a decorative magnet",
   item0: null,
   item1: null
 }
@@ -147,7 +149,7 @@ let coinProgress;
 let infoTypedKeys;
 let infoCheckedBoxes;
 let infoSpaceEfficiency;
-let infoChallengesDone;
+let infoCoinsSpent;
 let infoMagnets;
 let infoDuration;
 let infoArray = [];
@@ -259,11 +261,11 @@ function setupUser() {
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
   infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
   infoSpaceEfficiency = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, 0, "Use of Space", 55, "Efficiency", COLOR_GREEN, "%");
-  infoChallengesDone = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN / 2, "Completed", 2, "Challenge(s)", COLOR_ORANGE);
-  infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, INFO_SQUARE_SIZE + MARGIN / 2, "Earned", 1, "Magnet(s)", COLOR_PURPLE);
+  infoCoinsSpent = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN / 2, "Spent", 2, "Coin(s)", COLOR_ORANGE);
+  infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, INFO_SQUARE_SIZE + MARGIN / 2, "Obtained", 1, "Magnet(s)", COLOR_PURPLE);
   infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, INFO_SQUARE_SIZE + MARGIN / 2, "User for", 1, "day(s)", COLOR_YELLOW);
 
-  infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoChallengesDone, infoMagnets, infoDuration];
+  infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoCoinsSpent, infoMagnets, infoDuration];
 
   setupGiftShop();
 }
@@ -282,9 +284,11 @@ function setupGiftShop(){
       btnGift0.disabled = true;
       btnGift0.forget();
       giftShop.item0();
+
+      user.info.coinsSpent += giftShop.item0Price;
     }
   });
-  btnGift0.tooltip = "Enable Terminal Note";
+  btnGift0.tooltip = giftShop.item0Des;
   btnGift1 = new ButtonIcon(translateX + w/2+80+MARGIN/2, translateY + h/2 - MARGIN, size, size, GIFT_ROCKET);
   btnGift1.rotateIcon();
   btnGift1.connectFunc(function(){
@@ -293,9 +297,11 @@ function setupGiftShop(){
       btnGift1.disabled = true;
       btnGift1.forget();
       giftShop.item1();
+
+      user.info.coinsSpent += giftShop.item1Price;
     }
   });
-  btnGift1.tooltip = "Obtain a magnet";
+  btnGift1.tooltip = giftShop.item1Des;
 
   giftShop.item0 = function(){
     btnTerminal.disabled = false;
@@ -647,7 +653,7 @@ function displayCoins() {
   rect(-height, 0, height * 1.05, height * 1.05, 6);
   stroke(COLOR_GREY_DARK);
   strokeWeight(4);
-  fill(COLOR_BLUE);
+  fill(COLOR_ORANGE);
   let tempHeight = Math.round(displayCoinHeight);
   if (tempHeight >= 12){
     rect(-height, (height * 1.05) / 2 - tempHeight / 2, height, tempHeight, 6);
@@ -735,7 +741,7 @@ function displayGiftShop() {
       text("SOLD", 0,-4);
       pop();
     }else{
-      text("60 COINS", w/2 - 100, h/2 + 50 + MARGIN/2);
+      text(giftShop.item0Price + " COINS", w/2 - 100, h/2 + 50 + MARGIN/2);
     }
     if(giftShop.item1Sold){
       push();
@@ -746,18 +752,31 @@ function displayGiftShop() {
       text("SOLD", 0,-4);
       pop();
     }else{
-      text("60 COINS", w/2 + 100, h/2 + 50 + MARGIN/2);
+      text(giftShop.item1Price + " COINS", w/2 + 100, h/2 + 50 + MARGIN/2);
     }
   }
   pop();
 }
 
 function resetUserStatisticsAnimation() {
-  displayLevelHeight = 0;
+  updateStatistics();
+
+  displayCoinsHeight = 0;
   scrolledDown = false;
   for (let i = 0; i < infoArray.length; i++) {
     infoArray[i].reset();
   }
+}
+
+function updateStatistics(){
+  infoTypedKeys.value = user.info.keyStrokes;
+  infoCheckedBoxes.value = user.info.checkBoxes;
+  user.info.efficiency = getNoteSpaceEifficency()
+  infoSpaceEfficiency.value = user.info.efficiency;
+  infoCoinsSpent.value = user.info.coinsSpent;
+  user.info.magnets = magnetContainer;
+  infoMagnets.value = user.info.magnets.length;
+  //infoDuration.value = user.info.days;
 }
 
 // update dragged item
@@ -912,6 +931,7 @@ function keyPressed() {
     if (keyCode === 13) {
       charGrid.addChar("\n");
       playTypingSound(0);
+      user.info.keyStrokes ++;
       /*
       if (charGrid.theme === 0){
         charGrid.returnAnimH = MAX_NOTE_SIZE/CHAR_HEIGHT;
@@ -930,6 +950,7 @@ function keyTyped() {
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
       playTypingSound();
+      user.info.keyStrokes ++;
     }
   }
 }
@@ -1005,10 +1026,10 @@ function findTopItem() {
   return top;
 }
 
-function gainXp(xp) {
-
-}
-
-function nextLevelXp(level) {
-  return Math.round(0.8 * level * level + 10 * level);
+function getNoteSpaceEifficency(){
+  let total = 0;
+  for(let i = 0; i < noteContainer.length; i++){
+    total += noteContainer[i].getSpaceEifficency();
+  }
+  return (total/noteContainer.length) * 100;
 }
