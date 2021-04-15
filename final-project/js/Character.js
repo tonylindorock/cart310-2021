@@ -44,6 +44,9 @@ class Character {
       } else {
         thisObject.char = " ";
       }
+      if (charGrid.theme === 1){
+        SFX_BEEP.play();
+      }
     });
   }
 

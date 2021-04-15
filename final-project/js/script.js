@@ -159,6 +159,7 @@ let awardIcons = [];
 let user;
 let charGrid;
 let coinProgress;
+let notification;
 
 let infoTypedKeys;
 let infoCheckedBoxes;
@@ -266,6 +267,8 @@ function draw() {
   if (isShowingTooltip) {
     displayTooltip();
   }
+  notification.display();
+
   checkUserActivity();
 }
 
@@ -283,7 +286,7 @@ function setupSounds() {
 
 function setupUser() {
   user = new User();
-  user.info.coins = 100;
+  user.info.coins = 108;
   coinProgress = new Progress(0, user.info.coins, 99);
 
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
@@ -294,6 +297,9 @@ function setupUser() {
   infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, INFO_SQUARE_SIZE + MARGIN / 2, "User for", 1, "day(s)", COLOR_YELLOW);
 
   infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoCoinsSpent, infoMagnets, infoDuration];
+
+  notification = new Notification();
+  notification.update("Welcome");
 
   setupGiftShop();
 }
@@ -711,7 +717,7 @@ function displayCoins() {
   strokeWeight(4);
   fill(COLOR_ORANGE);
   let tempHeight = Math.round(displayCoinHeight);
-  if (tempHeight >= 12) {
+  if (tempHeight >= 8) {
     rect(-height, (height * 1.05) / 2 - tempHeight / 2, height, tempHeight, 6);
   }
 
@@ -723,7 +729,7 @@ function displayCoins() {
   text(user.info.coins + "/99", -height, height / 3);
   textAlign(LEFT, CENTER);
   textSize(48);
-  text("Coins", height / 2 - MARGIN, 0);
+  text("Points", height / 2 - MARGIN, 0);
   pop();
 }
 
@@ -797,7 +803,7 @@ function displayGiftShop() {
       text("SOLD", 0, -4);
       pop();
     } else {
-      text(giftShop.item0Price + " COINS", w / 2 - 100, h / 2 + 50 + MARGIN / 2);
+      text(giftShop.item0Price + " POINTS", w / 2 - 100, h / 2 + 50 + MARGIN / 2);
     }
     if (giftShop.item1Sold) {
       push();
@@ -808,7 +814,7 @@ function displayGiftShop() {
       text("SOLD", 0, -4);
       pop();
     } else {
-      text(giftShop.item1Price + " COINS", w / 2 + 100, h / 2 + 50 + MARGIN / 2);
+      text(giftShop.item1Price + " POINTS", w / 2 + 100, h / 2 + 50 + MARGIN / 2);
     }
   }
   pop();
@@ -1170,9 +1176,10 @@ function checkUserActivity(){
 }
 
 function addKeyStrokes(){
-  if (++ sessionStats.keyStrokes === 20){
+  if (++ sessionStats.keyStrokes === CHAR_WIDTH){
     sessionStats.keyStrokes = 0;
     user.info.coins ++;
+    notification.update("You earned 1 coin!");
     console.log("Coins +1");
   }
   user.info.keyStrokes ++;
@@ -1181,8 +1188,9 @@ function addKeyStrokes(){
 function addCheckedBoxes(){
   if (++ sessionStats.checkBoxes === 5){
     sessionStats.checkBoxes = 0;
-    user.info.coins += 2;
-    console.log("Coins +2");
+    user.info.coins += 1;
+    notification.update("You earned 1 coin!");
+    console.log("Coins +1");
   }
   user.info.checkBoxes ++;
 }
