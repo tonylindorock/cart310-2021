@@ -31,8 +31,8 @@ class User {
   }
 
   useCoins(amount){
-    if (this.coins >= amount){
-      this.coins -= amount;
+    if (this.info.coins >= amount){
+      this.info.coins -= amount;
       return true;
     }
     return false;

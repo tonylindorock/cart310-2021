@@ -120,8 +120,8 @@ let giftShop = {
   item1Sold: false,
   item0Price: 60,
   item1Price: 40,
-  item0Des: "Enable Terminal Note",
-  item1Des: "Obtain a decorative magnet",
+  item0Des: "ENABLE TERMINAL NOTE",
+  item1Des: "OBTAIN A DECORATIVE MAGNET",
   item0: null,
   item1: null
 }
@@ -256,7 +256,8 @@ function setupSounds() {
 
 function setupUser() {
   user = new User();
-  coinProgress = new Progress(0, 60, 99);
+  user.info.coins = 100;
+  coinProgress = new Progress(0, user.info.coins, 99);
 
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
   infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
@@ -286,6 +287,7 @@ function setupGiftShop(){
       giftShop.item0();
 
       user.info.coinsSpent += giftShop.item0Price;
+      updateStatistics();
     }
   });
   btnGift0.tooltip = giftShop.item0Des;
@@ -299,6 +301,7 @@ function setupGiftShop(){
       giftShop.item1();
 
       user.info.coinsSpent += giftShop.item1Price;
+      updateStatistics();
     }
   });
   btnGift1.tooltip = giftShop.item1Des;
@@ -769,6 +772,7 @@ function resetUserStatisticsAnimation() {
 }
 
 function updateStatistics(){
+  coinProgress.value = user.info.coins;
   infoTypedKeys.value = user.info.keyStrokes;
   infoCheckedBoxes.value = user.info.checkBoxes;
   user.info.efficiency = getNoteSpaceEifficency()
