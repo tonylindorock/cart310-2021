@@ -6,7 +6,7 @@ class Character {
     this.highlight = false;
 
     this.underlineColor = COLOR_BLACK;
-    this.highlightColor = COLOR_YELLOW;
+    this.highlightColor = HIGHLIGHT_COLORS[0];
 
     this.special = special;
     this.button = null;

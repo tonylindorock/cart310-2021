@@ -6,6 +6,8 @@ class DraggableAward extends Draggable {
     this.bgColor = bgColor
     this.image = image;
 
+    this.iconId = awardIcons.indexOf(image);
+
     this.ENLARGER_RADIO = 1.05;
   }
 

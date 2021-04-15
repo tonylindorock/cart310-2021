@@ -142,6 +142,8 @@ let hoveredDraggables = [];
 
 let noteContainer = [];
 
+let awardIcons = [];
+
 let user;
 let charGrid;
 let coinProgress;
@@ -214,14 +216,21 @@ function setup() {
   createCanvas(windowWidth, windowHeight * 2);
   noStroke();
 
-  TOP_MENU_HEIGHT = windowHeight/8.5;
+  TOP_MENU_HEIGHT = windowHeight / 8.5;
+  awardIcons = [AWARD_FIRST_USE, AWARD_ROCKET];
+
+  //removeItem('user');
 
   setupUser();
   setupSounds();
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
-  setupFirstUse();
+  if (!loadUserData()) {
+    setupFirstUse();
+  }else{
+    loadContainers();
+  }
 }
 
 function draw() {
@@ -241,6 +250,7 @@ function draw() {
   if (isShowingTooltip) {
     displayTooltip();
   }
+  saveUserData();
 }
 
 function setupSounds() {
@@ -271,16 +281,16 @@ function setupUser() {
   setupGiftShop();
 }
 
-function setupGiftShop(){
-  let translateX = windowWidth/2 + MARGIN;
+function setupGiftShop() {
+  let translateX = windowWidth / 2 + MARGIN;
   let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
   let w = INFO_SQUARE_SIZE * 3 + MARGIN;
   let h = INFO_SQUARE_SIZE * 2 + MARGIN / 2;
   let size = 160;
-  btnGift0 = new ButtonIcon(translateX + w/2-80-MARGIN/2, translateY + h/2 - MARGIN, size, size, ICON_NOTE_TERMINAL);
+  btnGift0 = new ButtonIcon(translateX + w / 2 - 80 - MARGIN / 2, translateY + h / 2 - MARGIN, size, size, ICON_NOTE_TERMINAL);
   btnGift0.rotateIcon();
-  btnGift0.connectFunc(function(){
-    if (user.useCoins(giftShop.item0Price)){
+  btnGift0.connectFunc(function() {
+    if (user.useCoins(giftShop.item0Price)) {
       giftShop.item0Sold = true;
       btnGift0.disabled = true;
       btnGift0.forget();
@@ -291,10 +301,10 @@ function setupGiftShop(){
     }
   });
   btnGift0.tooltip = giftShop.item0Des;
-  btnGift1 = new ButtonIcon(translateX + w/2+80+MARGIN/2, translateY + h/2 - MARGIN, size, size, GIFT_ROCKET);
+  btnGift1 = new ButtonIcon(translateX + w / 2 + 80 + MARGIN / 2, translateY + h / 2 - MARGIN, size, size, GIFT_ROCKET);
   btnGift1.rotateIcon();
-  btnGift1.connectFunc(function(){
-    if (user.useCoins(giftShop.item1Price)){
+  btnGift1.connectFunc(function() {
+    if (user.useCoins(giftShop.item1Price)) {
       giftShop.item1Sold = true;
       btnGift1.disabled = true;
       btnGift1.forget();
@@ -306,10 +316,10 @@ function setupGiftShop(){
   });
   btnGift1.tooltip = giftShop.item1Des;
 
-  giftShop.item0 = function(){
+  giftShop.item0 = function() {
     btnTerminal.disabled = false;
   };
-  giftShop.item1 = function(){
+  giftShop.item1 = function() {
     addAward(COLOR_RED, AWARD_ROCKET);
   };
 }
@@ -537,7 +547,7 @@ function displayTrashCan() {
   // if detect dragging note over, turn trash to black
   if (checkForNoteDeletion()) {
     fill(COLOR_WHITE);
-    ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, size*1.5);
+    ellipse(MARGIN + size / 2, windowHeight - MARGIN - size / 2, size * 1.5);
     image(ICON_TRASH_BLACK, MARGIN + size / 2, windowHeight - MARGIN - size / 2, size, size);
     trashAnim.angle = lerp(trashAnim.angle, 270, trashAnim.angleSpeed);
     let radius = 32;
@@ -658,7 +668,7 @@ function displayCoins() {
   strokeWeight(4);
   fill(COLOR_ORANGE);
   let tempHeight = Math.round(displayCoinHeight);
-  if (tempHeight >= 12){
+  if (tempHeight >= 12) {
     rect(-height, (height * 1.05) / 2 - tempHeight / 2, height, tempHeight, 6);
   }
 
@@ -676,7 +686,7 @@ function displayCoins() {
 
 function displayStatistics() {
   push();
-  let translateX = windowWidth/2 - (INFO_SQUARE_SIZE * 3 + MARGIN) - MARGIN;
+  let translateX = windowWidth / 2 - (INFO_SQUARE_SIZE * 3 + MARGIN) - MARGIN;
   let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
   translate(translateX, translateY);
   textAlign(LEFT, CENTER);
@@ -693,7 +703,7 @@ function displayStatistics() {
 
 function displayGiftShop() {
   push();
-  let translateX = windowWidth/2 + MARGIN;
+  let translateX = windowWidth / 2 + MARGIN;
   let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
 
   translate(translateX, translateY);
@@ -715,10 +725,10 @@ function displayGiftShop() {
   textAlign(LEFT, CENTER);
   fill(COLOR_GREY);
   textSize(20);
-  text("These items will be available for 7 days", MARGIN/2, h - MARGIN);
+  text("These items will be available for 7 days", MARGIN / 2, h - MARGIN);
   pop();
   // items
-  if (!(giftShop.item0Sold && giftShop.item1Sold)){
+  if (!(giftShop.item0Sold && giftShop.item1Sold)) {
     btnGift0.display();
     btnGift1.display();
   }
@@ -731,31 +741,31 @@ function displayGiftShop() {
   textAlign(CENTER, CENTER);
   fill(COLOR_ORANGE);
   textSize(24);
-  if (giftShop.item0Sold && giftShop.item1Sold){
+  if (giftShop.item0Sold && giftShop.item1Sold) {
     fill(COLOR_GREY);
-    text("SOLD OUT", w/2, h/2);
-  }else{
-    if(giftShop.item0Sold){
+    text("SOLD OUT", w / 2, h / 2);
+  } else {
+    if (giftShop.item0Sold) {
       push();
-      translate(w/2-80-MARGIN/2, h/2 - 50 + MARGIN/2);
+      translate(w / 2 - 80 - MARGIN / 2, h / 2 - 50 + MARGIN / 2);
       rotate(-15);
-      rect(0,0, 100, 48);
+      rect(0, 0, 100, 48);
       fill(COLOR_WHITE);
-      text("SOLD", 0,-4);
+      text("SOLD", 0, -4);
       pop();
-    }else{
-      text(giftShop.item0Price + " COINS", w/2 - 100, h/2 + 50 + MARGIN/2);
+    } else {
+      text(giftShop.item0Price + " COINS", w / 2 - 100, h / 2 + 50 + MARGIN / 2);
     }
-    if(giftShop.item1Sold){
+    if (giftShop.item1Sold) {
       push();
-      translate(w/2+80+MARGIN/2, h/2 - 50 + MARGIN/2);
+      translate(w / 2 + 80 + MARGIN / 2, h / 2 - 50 + MARGIN / 2);
       rotate(-15);
-      rect(0,0, 100, 48);
+      rect(0, 0, 100, 48);
       fill(COLOR_WHITE);
-      text("SOLD", 0,-4);
+      text("SOLD", 0, -4);
       pop();
-    }else{
-      text(giftShop.item1Price + " COINS", w/2 + 100, h/2 + 50 + MARGIN/2);
+    } else {
+      text(giftShop.item1Price + " COINS", w / 2 + 100, h / 2 + 50 + MARGIN / 2);
     }
   }
   pop();
@@ -771,7 +781,7 @@ function resetUserStatisticsAnimation() {
   }
 }
 
-function updateStatistics(){
+function updateStatistics() {
   coinProgress.value = user.info.coins;
   infoTypedKeys.value = user.info.keyStrokes;
   infoCheckedBoxes.value = user.info.checkBoxes;
@@ -846,7 +856,7 @@ function createNote(theme) {
     console.log("Cannot create note. Max number reached.");
   }
 
-  if (SFX_CREATENOTE.isPlaying()){
+  if (SFX_CREATENOTE.isPlaying()) {
     SFX_CREATENOTE.stop();
   }
   SFX_CREATENOTE.play();
@@ -882,7 +892,7 @@ function openNote(id) {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-function addAward(color, icon){
+function addAward(color, icon) {
   let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
   let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
   let magnet = new DraggableAward(rX, rY, color, icon, getItemId());
@@ -935,7 +945,7 @@ function keyPressed() {
     if (keyCode === 13) {
       charGrid.addChar("\n");
       playTypingSound(0);
-      user.info.keyStrokes ++;
+      user.info.keyStrokes++;
       /*
       if (charGrid.theme === 0){
         charGrid.returnAnimH = MAX_NOTE_SIZE/CHAR_HEIGHT;
@@ -954,7 +964,7 @@ function keyTyped() {
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
       playTypingSound();
-      user.info.keyStrokes ++;
+      user.info.keyStrokes++;
     }
   }
 }
@@ -1030,10 +1040,68 @@ function findTopItem() {
   return top;
 }
 
-function getNoteSpaceEifficency(){
+function getNoteSpaceEifficency() {
   let total = 0;
-  for(let i = 0; i < noteContainer.length; i++){
+  for (let i = 0; i < noteContainer.length; i++) {
     total += noteContainer[i].getSpaceEifficency();
   }
-  return (total/noteContainer.length) * 100;
+  return (total / noteContainer.length) * 100;
+}
+
+function loadUserData() {
+  let result = user.loadData();
+  console.log("Loading user data... Data Exists: " + result);
+  console.log(user.info);
+  return result;
+}
+
+function loadContainers(){
+  for(let j = 0; j < user.info.notes.length; j ++){
+    let id = user.info.notes[j]['id'];
+    let theme = user.info.notes[j]['theme'];
+    let bgColor = user.info.notes[j]['bgColor'];
+    let textColor = user.info.notes[j]['textColor'];
+    let pos = user.info.notes[j]['pos'];
+
+    let userNote, userNoteThumbnail;
+    // add note
+    userNote = new CharGrid(theme, bgColor, textColor, id);
+    // add lines
+    for (let i = 0; i < user.info.notes[j]['lines'].length; i++){
+      userNote.addLine(user.info.notes[j]['lines'][i]);
+    }
+    // add markup
+    for (let i = 0; i < user.info.notes[j]['markup'].length; i++){
+      let x = user.info.notes[j]['markup'][i][0];
+      let y = user.info.notes[j]['markup'][i][1];
+      let markupType = user.info.notes[j]['markup'][i][2];
+      if (markupType === 0){
+        userNote.characters[x][y].underline = true;
+      }else if (markupType === 1){
+        userNote.characters[x][y].highlight = true;
+      }
+    }
+    // add thumbnail
+    userNoteThumbnail = new DraggableNote(pos[0], pos[1], bgColor, textColor, theme, userNote.getFirstLine(), id);
+
+    noteContainer.push(userNote);
+    noteThumbnailContainer.push(userNoteThumbnail);
+  }
+  // add magnets
+  for(let j = 0; j < user.info.magnets.length; j ++){
+    let bgColor = user.info.magnets[j]['bgColor'];
+    let id = user.info.magnets[j]['id'];
+    let iconId = user.info.magnets[j]['iconId'];
+    let pos = user.info.magnets[j]['pos'];
+    let magnet = new DraggableAward(pos[0], pos[1], bgColor, awardIcons[iconId], id);
+
+    magnetContainer.push(magnet);
+  }
+}
+
+function saveUserData() {
+  if (frameCount % 600 === 0 && frameCount != 0) {
+    user.saveData();
+    console.log("User data saved.");
+  }
 }
