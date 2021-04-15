@@ -6,6 +6,8 @@ class CharGrid {
     this.font = "Courier";
     this.bgColor = bgColor;
     this.textColor = textColor;
+    this.underlineColor = COLOR_BLACK;
+    this.highlightColor = HIGHLIGHT_COLORS[0];
 
     this.scanLineCount = 100;
 
@@ -27,7 +29,7 @@ class CharGrid {
     this.keyIsTyped = false;
 
     this.returnAnimDone = true;
-    this.returnAnimH = MAX_NOTE_SIZE/CHAR_HEIGHT;
+    this.returnAnimH = MAX_NOTE_SIZE / CHAR_HEIGHT;
 
     this.setup();
   }
@@ -37,16 +39,17 @@ class CharGrid {
       this.font = FONT_PLAYFUL;
     } else if (this.theme === 1) {
       this.font = FONT_TERMINAL;
-      this.highlightColor = this.bgColor;
+      this.underlineColor = this.textColor;
+      this.highlightColor = this.textColor;
     }
   }
 
-  getSpaceEifficency(){
+  getSpaceEifficency() {
     let charNum = 0;
-    for(let i = 0; i < this.lines.length; i++){
+    for (let i = 0; i < this.lines.length; i++) {
       charNum += this.lines[i].length;
     }
-    return charNum/(CHAR_WIDTH * CHAR_HEIGHT);
+    return charNum / (CHAR_WIDTH * CHAR_HEIGHT);
   }
 
   // return the first line
@@ -63,7 +66,7 @@ class CharGrid {
         this.pointerPosX = 0;
         this.lines.push("");
         this.characters.push([]);
-      // if no space
+        // if no space
       } else {
         valid = false;
       }
@@ -74,7 +77,7 @@ class CharGrid {
       let newChar = new Character(this.pointerPosX, this.pointerPosY, character, special);
       newChar.underlineEnabled = this.underlineEnabled;
       newChar.highlightEnabled = this.highlightEnabled;
-      if (this.theme === 0){
+      if (this.theme === 0) {
         newChar.startAnimation();
       }
       this.lines[this.pointerPosY] = this.lines[this.pointerPosY] + character;
@@ -169,24 +172,24 @@ class CharGrid {
     } else {
       noFill();
     }
-    if(this.theme === 0){
+    if (this.theme === 0) {
       this.tempPointerPosX = lerp(this.tempPointerPosX, this.pointerPosX, 0.4);
       this.tempPointerPosY = lerp(this.tempPointerPosY, this.pointerPosY, 0.2);
-    }else{
+    } else {
       this.tempPointerPosX = this.pointerPosX;
       this.tempPointerPosY = this.pointerPosY;
     }
     // if theme is not terminal, display a thinner one
     if (this.theme != 1) {
       rect(this.tempPointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.tempPointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, 3, MAX_NOTE_SIZE / CHAR_HEIGHT);
-    // display a thicker one
+      // display a thicker one
     } else {
       rect(this.tempPointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.tempPointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT, MAX_NOTE_SIZE / CHAR_WIDTH * 0.8, MAX_NOTE_SIZE / CHAR_HEIGHT);
     }
     pop();
   }
 
-  displayScanLines(){
+  displayScanLines() {
     // draw scanlines for terminal
     push();
     translate(windowWidth / 2 - this.MAX_SIZE / 2, TOP_MENU_HEIGHT / 2);
@@ -199,22 +202,22 @@ class CharGrid {
     pop();
   }
 
-  playReturnPressedAnimation(){
+  playReturnPressedAnimation() {
     push();
     translate(0, TOP_MENU_HEIGHT / 2);
-    if (!this.returnAnimDone){
+    if (!this.returnAnimDone) {
       this.returnAnimH = lerp(this.returnAnimH, 0, 0.2);
       fill(COLOR_WHITE);
-      rect(this.pointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT + this.returnAnimH/2, windowWidth, this.returnAnimH);
+      rect(this.pointerPosX * MAX_NOTE_SIZE / CHAR_WIDTH, this.pointerPosY * MAX_NOTE_SIZE / CHAR_HEIGHT + this.returnAnimH / 2, windowWidth, this.returnAnimH);
 
-      if (Math.round(this.returnAnimH) === 0){
+      if (Math.round(this.returnAnimH) === 0) {
         this.returnAnimDone = true;
       }
     }
     pop();
   }
 
-  updateMarkupColor(){
+  updateMarkupColor() {
     for (let i = 0; i < this.characters.length; i++) {
       for (let j = 0; j < this.characters[i].length; j++) {
         this.characters[i][j].underlineColor = this.textColor;
@@ -223,7 +226,7 @@ class CharGrid {
     }
   }
 
-  resetAnimation(){
+  resetAnimation() {
     for (let i = 0; i < this.characters.length; i++) {
       for (let j = 0; j < this.characters[i].length; j++) {
         this.characters[i][j].startAnimation();
@@ -261,10 +264,10 @@ class CharGrid {
 
     this.displayPointer();
 
-    if (this.theme === 1){
+    if (this.theme === 1) {
       this.displayScanLines();
     }
-    if (this.theme === 0){
+    if (this.theme === 0) {
       this.playReturnPressedAnimation();
     }
   }

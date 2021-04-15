@@ -11,6 +11,8 @@ FONTS FROM:
 https://www.1001fonts.com/goldie-boxing-font.html
 https://webfonts.ffonts.net/04b03.font.download
 
+SOUND purchase FROM:
+https://www.youtube.com/watch?v=4kVTqUxJYBA
 ******************/
 
 const CHAR_WIDTH = 34;
@@ -76,6 +78,7 @@ let ICON_NOTE_PLAIN;
 let ICON_TRASH_GREY;
 let ICON_TRASH_BLACK;
 let ICON_ADD;
+let ICON_PURGE;
 let ICON_DISABLED;
 
 let ICON_CLOSE;
@@ -99,6 +102,7 @@ let SFX_TYPING_2;
 let SFX_TYPING_3;
 let SFX_BEEP;
 let SFX_CREATENOTE;
+let SFX_PURCHASE;
 // ********************************
 
 let currentItemIndex = 0;
@@ -124,6 +128,14 @@ let giftShop = {
   item1Des: "OBTAIN A DECORATIVE MAGNET",
   item0: null,
   item1: null
+}
+let userActivity = {
+  inactive: false,
+  timer: null
+};
+let sessionStats = {
+  keyStrokes: 0,
+  checkBoxes: 0
 }
 
 let showAddMenu = false;
@@ -157,6 +169,7 @@ let infoDuration;
 let infoArray = [];
 
 let btnAdd;
+let btnPurge;
 let btnPlayful;
 let btnTerminal;
 let btnPlain;
@@ -186,6 +199,7 @@ function preload() {
 
   ICON_TRASH_GREY = loadImage("assets/images/icon_trash_grey.png");
   ICON_TRASH_BLACK = loadImage("assets/images/icon_trash_black.png");
+  ICON_PURGE = loadImage("assets/images/icon_purge.png");
   ICON_ADD = loadImage("assets/images/icon_add.png");
   ICON_DISABLED = loadImage("assets/images/icon_disabled.png");
   ICON_CLOSE = loadImage("assets/images/icon_close.png");
@@ -209,6 +223,7 @@ function preload() {
   SFX_TYPING_3 = loadSound("assets/sounds/typing_4.mp3");
   SFX_BEEP = loadSound("assets/sounds/beep.mp3");
   SFX_CREATENOTE = loadSound("assets/sounds/create.mp3");
+  SFX_PURCHASE = loadSound("assets/sounds/purchase.mp3");
 }
 
 // setup main screen
@@ -231,6 +246,7 @@ function setup() {
   }else{
     loadContainers();
   }
+  updateStatistics();
 }
 
 function draw() {
@@ -250,7 +266,7 @@ function draw() {
   if (isShowingTooltip) {
     displayTooltip();
   }
-  saveUserData();
+  checkUserActivity();
 }
 
 function setupSounds() {
@@ -262,6 +278,7 @@ function setupSounds() {
   SFX_TYPING_3.setVolume(typingVol);
   SFX_BEEP.setVolume(0.1);
   SFX_CREATENOTE.setVolume(0.1);
+  SFX_PURCHASE.setVolume(0.3);
 }
 
 function setupUser() {
@@ -298,6 +315,7 @@ function setupGiftShop() {
 
       user.info.coinsSpent += giftShop.item0Price;
       updateStatistics();
+      SFX_PURCHASE.play();
     }
   });
   btnGift0.tooltip = giftShop.item0Des;
@@ -312,6 +330,7 @@ function setupGiftShop() {
 
       user.info.coinsSpent += giftShop.item1Price;
       updateStatistics();
+      SFX_PURCHASE.play();
     }
   });
   btnGift1.tooltip = giftShop.item1Des;
@@ -326,11 +345,10 @@ function setupGiftShop() {
 
 // setup all the main menu buttons
 function setupMainMenuBtns() {
+  btnPurge = new ButtonIcon(32, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_PURGE);
+  btnPurge.tooltip = "PURGE ALL DATA";
   // create note butotn
   btnAdd = new ButtonIcon(windowWidth - 64, TOP_MENU_HEIGHT / 2, UNI_BTN_HEIGHT, UNI_BTN_HEIGHT, ICON_ADD);
-  btnAdd.connectFunc(function() {
-    showAddMenu = !showAddMenu;
-  });
   btnAdd.tooltip = "ADD A NOTE";
 
   let menuPosX = windowWidth - 48 - ADD_MENU_WIDTH;
@@ -339,18 +357,41 @@ function setupMainMenuBtns() {
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
   btnPlayful.rotateIcon();
+  btnPlayful.disabled = true;
+
+  btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
+  btnTerminal.rotateIcon();
+  btnTerminal.disabled = true;
+
+  btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
+  btnPlain.rotateIcon();
+
+  connectMainMenuBtns();
+}
+
+function connectMainMenuBtns(){
+  btnPurge.connectFunc(function() {
+    setTimeout(function() {
+      if (confirm("Are you sure you want to purge all data?")){
+        removeItem('user');
+        location.reload();
+        console.log("All data erased!");
+      }
+    }, 200);
+  });
+
+  btnAdd.connectFunc(function() {
+    showAddMenu = !showAddMenu;
+  });
+
   btnPlayful.connectFunc(function() {
     createNote(0);
   });
-  btnPlayful.disabled = true;
-  btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
-  btnTerminal.rotateIcon();
+
   btnTerminal.connectFunc(function() {
     createNote(1);
   });
-  btnTerminal.disabled = true;
-  btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
-  btnPlain.rotateIcon();
+
   btnPlain.connectFunc(function() {
     createNote(2);
   });
@@ -385,6 +426,7 @@ function connectEditorBtns() {
   // close note
   btnClose.connectFunc(function() {
     editingNote = false;
+    saveUserData();
     updateNoteThumbnail();
     resizeCanvas(windowWidth, windowHeight * 2);
     resetUserStatisticsAnimation();
@@ -458,7 +500,7 @@ function connectEditorBtns() {
       btnTextColor.colorIndex = 0;
     }
     charGrid.textColor = btnTextColor.colorProfile[btnTextColor.colorIndex];
-    if (charGrid.theme === 1) {
+    if (charGrid.theme === 1){
       charGrid.updateMarkupColor();
     }
   });
@@ -517,6 +559,7 @@ function displayMainMeun() {
   textSize(64);
   fill(COLOR_WHITE);
   text("Noteeboardd", windowWidth / 2, TOP_MENU_HEIGHT / 2 + (MARGIN / 2));
+  btnPurge.display();
   btnAdd.display();
 
   // trash and delete
@@ -785,7 +828,7 @@ function updateStatistics() {
   coinProgress.value = user.info.coins;
   infoTypedKeys.value = user.info.keyStrokes;
   infoCheckedBoxes.value = user.info.checkBoxes;
-  user.info.efficiency = getNoteSpaceEifficency()
+  user.info.efficiency = getNoteSpaceEifficency();
   infoSpaceEfficiency.value = user.info.efficiency;
   infoCoinsSpent.value = user.info.coinsSpent;
   user.info.magnets = magnetContainer;
@@ -945,7 +988,7 @@ function keyPressed() {
     if (keyCode === 13) {
       charGrid.addChar("\n");
       playTypingSound(0);
-      user.info.keyStrokes++;
+      addKeyStrokes();
       /*
       if (charGrid.theme === 0){
         charGrid.returnAnimH = MAX_NOTE_SIZE/CHAR_HEIGHT;
@@ -964,7 +1007,7 @@ function keyTyped() {
     if (ALL_CHAR.includes(key)) {
       charGrid.addChar(key);
       playTypingSound();
-      user.info.keyStrokes++;
+      addKeyStrokes();
     }
   }
 }
@@ -1075,10 +1118,13 @@ function loadContainers(){
       let x = user.info.notes[j]['markup'][i][0];
       let y = user.info.notes[j]['markup'][i][1];
       let markupType = user.info.notes[j]['markup'][i][2];
+      let color = user.info.notes[j]['markup'][i][3];
       if (markupType === 0){
         userNote.characters[x][y].underline = true;
+        userNote.characters[x][y].underlineColor = color;
       }else if (markupType === 1){
         userNote.characters[x][y].highlight = true;
+        userNote.characters[x][y].highlightColor = color;
       }
     }
     // add thumbnail
@@ -1086,6 +1132,7 @@ function loadContainers(){
 
     noteContainer.push(userNote);
     noteThumbnailContainer.push(userNoteThumbnail);
+    currentItemIndex++;
   }
   // add magnets
   for(let j = 0; j < user.info.magnets.length; j ++){
@@ -1096,12 +1143,46 @@ function loadContainers(){
     let magnet = new DraggableAward(pos[0], pos[1], bgColor, awardIcons[iconId], id);
 
     magnetContainer.push(magnet);
+    currentItemIndex++;
   }
 }
 
 function saveUserData() {
-  if (frameCount % 600 === 0 && frameCount != 0) {
-    user.saveData();
-    console.log("User data saved.");
+  user.saveData();
+  console.log("User data saved.");
+}
+
+function userIsActive(){
+  if (userActivity.timer != null){
+    clearTimeout(userActivity.timer);
+    userActivity.timer = null;
   }
+}
+
+function checkUserActivity(){
+  if (userActivity.inactive){
+    if (userActivity.timer === null){
+      userActivity.timer = setTimeout(function(){
+        saveUserData();
+      }, 30000);
+    }
+  }
+}
+
+function addKeyStrokes(){
+  if (++ sessionStats.keyStrokes === 20){
+    sessionStats.keyStrokes = 0;
+    user.info.coins ++;
+    console.log("Coins +1");
+  }
+  user.info.keyStrokes ++;
+}
+
+function addCheckedBoxes(){
+  if (++ sessionStats.checkBoxes === 5){
+    sessionStats.checkBoxes = 0;
+    user.info.coins += 2;
+    console.log("Coins +2");
+  }
+  user.info.checkBoxes ++;
 }

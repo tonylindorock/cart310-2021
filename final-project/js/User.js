@@ -37,25 +37,32 @@ class User {
       noteData['bgColor'] = noteContainer[i].bgColor;
       noteData['textColor'] = noteContainer[i].textColor;
       noteData['lines'] = noteContainer[i].lines;
-      let markup = [];
-      for (let a = 0; a < noteContainer[i].characters.length; a++) {
-        for (let b = 0; b < noteContainer[i].characters[a].length; b++) {
-          if (noteContainer[i].characters[a][b].underline){
-            markup.push([a, b, 0]);
-          }
-          if (noteContainer[i].characters[a][b].highlight){
-            markup.push([a, b, 1]);
+      noteData['markup'] = [];
+      if (noteContainer[i].characters[0][0] != null){
+        let markup = [];
+        for (let a = 0; a < noteContainer[i].characters.length; a++) {
+          for (let b = 0; b < noteContainer[i].characters[a].length; b++) {
+            if (noteContainer[i].characters[a][b].underline){
+              markup.push([a, b, 0, noteContainer[i].characters[a][b].underlineColor]);
+            }
+            if (noteContainer[i].characters[a][b].highlight){
+              if (noteContainer[i].theme === 1){
+                markup.push([a, b, 1, noteContainer[i].textColor]);
+              }else{
+                markup.push([a, b, 1, noteContainer[i].characters[a][b].highlightColor]);
+              }
+            }
           }
         }
+        noteData['markup'] = markup;
       }
-      noteData['markup'] = markup;
       for(let j = 0; j < noteThumbnailContainer.length; j++){
         if(noteData['id'] === noteThumbnailContainer[j].id){
           noteData['pos'] = [noteThumbnailContainer[j].posX, noteThumbnailContainer[j].posY];
         }
       }
       this.info.notes.push(noteData);
-      console.log(noteData);
+      //console.log(noteData);
     }
     for(let i = 0; i < magnetContainer.length; i++){
       let magnet = {};

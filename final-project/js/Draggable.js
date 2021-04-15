@@ -27,6 +27,7 @@ class Draggable {
       updateDraggableItems(this, true);
 
       if (mouseIsPressed) {
+        userIsActive();
         cursor('grab');
         let top = findTopItem(); // get the draggable on the very top
         // if it's the selected item and the object on the top
