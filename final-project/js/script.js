@@ -1,3 +1,4 @@
+"use strict";
 /*****************
 
 Noteeboardd
@@ -139,7 +140,8 @@ let userActivity = {
 };
 let sessionStats = {
   keyStrokes: 0,
-  checkBoxes: 0
+  checkBoxes: 0,
+  earnedPoints: 0
 }
 
 let showAddMenu = false;
@@ -147,7 +149,7 @@ let editingNote = false;
 let isShowingTooltip = false;
 let currentTooltip = "";
 
-let displayCoinHeight = 0;
+let displayPointHeight = 0;
 let scrollPos = 0;
 let scrolledDown = false;
 
@@ -162,13 +164,13 @@ let awardIcons = [];
 
 let user;
 let charGrid;
-let coinProgress;
+let pointProgress;
 let notification;
 
 let infoTypedKeys;
 let infoCheckedBoxes;
 let infoSpaceEfficiency;
-let infoCoinsSpent;
+let infoPointsEarned;
 let infoMagnets;
 let infoDuration;
 let infoArray = [];
@@ -240,8 +242,6 @@ function setup() {
   TOP_MENU_HEIGHT = windowHeight / 8.5;
   awardIcons = [AWARD_FIRST_USE, AWARD_ROCKET];
 
-  //removeItem('user');
-
   setupUser();
   setupSounds();
 
@@ -250,6 +250,7 @@ function setup() {
   if (!loadUserData()) {
     setupFirstUse();
   }else{
+    notification.update("Hello! Welcome back!");
     loadContainers();
   }
   updateStatistics();
@@ -274,11 +275,11 @@ function draw() {
   }
   notification.display();
 
-  checkUserActivity();
+  autoSave();
 }
 
 function setupSounds() {
-  SFX_DELETE.setVolume(0.2);
+  SFX_DELETE.setVolume(0.3);
   let typingVol = 0.08;
   SFX_TYPING_0.setVolume(typingVol);
   SFX_TYPING_1.setVolume(typingVol);
@@ -292,20 +293,18 @@ function setupSounds() {
 
 function setupUser() {
   user = new User();
-  user.info.coins = 108;
-  coinProgress = new Progress(0, user.info.coins, 99);
+  pointProgress = new Progress(0, user.info.points, 99);
 
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
   infoCheckedBoxes = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, 0, "Checked", 5, "Checkbox(es)", COLOR_RED);
   infoSpaceEfficiency = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, 0, "Use of Space", 55, "Efficiency", COLOR_GREEN, "%");
-  infoCoinsSpent = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN / 2, "Spent", 2, "Coin(s)", COLOR_ORANGE);
+  infoPointsEarned = new InfoSquare(0, INFO_SQUARE_SIZE + MARGIN / 2, "Earned in total", 2, "Point(s)", COLOR_ORANGE);
   infoMagnets = new InfoSquare(INFO_SQUARE_SIZE + MARGIN / 2, INFO_SQUARE_SIZE + MARGIN / 2, "Obtained", 1, "Magnet(s)", COLOR_PURPLE);
   infoDuration = new InfoSquare((INFO_SQUARE_SIZE + MARGIN / 2) * 2, INFO_SQUARE_SIZE + MARGIN / 2, "User for", 1, "day(s)", COLOR_YELLOW);
 
-  infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoCoinsSpent, infoMagnets, infoDuration];
+  infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoPointsEarned, infoMagnets, infoDuration];
 
   notification = new Notification();
-  notification.update("Hello! Welcome to Noteeboardd!");
 
   setupGiftShop();
 }
@@ -319,13 +318,12 @@ function setupGiftShop() {
   btnGift0 = new ButtonIcon(translateX + w / 2 - 80 - MARGIN / 2, translateY + h / 2 - MARGIN, size, size, ICON_NOTE_TERMINAL);
   btnGift0.rotateIcon();
   btnGift0.connectFunc(function() {
-    if (user.useCoins(giftShop.item0Price)) {
+    if (user.usePoints(giftShop.item0Price)) {
       giftShop.item0Sold = true;
       btnGift0.disabled = true;
       btnGift0.forget();
       giftShop.item0();
 
-      user.info.coinsSpent += giftShop.item0Price;
       updateStatistics();
       SFX_PURCHASE.play();
     }
@@ -334,13 +332,12 @@ function setupGiftShop() {
   btnGift1 = new ButtonIcon(translateX + w / 2 + 80 + MARGIN / 2, translateY + h / 2 - MARGIN, size, size, GIFT_ROCKET);
   btnGift1.rotateIcon();
   btnGift1.connectFunc(function() {
-    if (user.useCoins(giftShop.item1Price)) {
+    if (user.usePoints(giftShop.item1Price)) {
       giftShop.item1Sold = true;
       btnGift1.disabled = true;
       btnGift1.forget();
       giftShop.item1();
 
-      user.info.coinsSpent += giftShop.item1Price;
       updateStatistics();
       SFX_PURCHASE.play();
     }
@@ -519,7 +516,17 @@ function connectEditorBtns() {
 }
 
 function setupFirstUse() {
-  let titles = ["Double click to open a sticky note", "Drag the note near the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and rewards"];
+  user.info.startDay = day();
+  user.info.startMonth = month() - 1;
+  user.info.startYear = year();
+  user.info.todayUsed = true;
+
+  notification.update("Hello! Welcome to Noteeboardd!");
+  notification.update("You get 10 points for being a new user!");
+  user.addPoints(10);
+  notification.update("Start typing!");
+
+  let titles = ["Double click to open a sticky note", "Drag the note to the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and the gift shop"];
   for (let i = 0; i < titles.length; i++) {
     let id = getItemId();
     let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
@@ -698,23 +705,28 @@ function displayUserInfo() {
   rectMode(CORNER);
   fill(COLOR_BLACK);
   rect(0, windowHeight, windowWidth, windowHeight);
+  fill(COLOR_ORANGE);
+  textAlign(RIGHT);
+  textFont(FONT_PLAYFUL);
+  textSize(20);
+  text(CHAR_WIDTH * 2 + " keystrokes = 1 point\n5 checked checkboxes = 1 point\nevery day +2 points", windowWidth - MARGIN, windowHeight + MARGIN*1.5);
   pop();
-  displayCoins();
+  displayPoints();
   displayStatistics();
   displayGiftShop();
 }
 
-function displayCoins() {
+function displayPoints() {
   push();
   rectMode(CENTER);
   textFont(FONT_PLAYFUL);
   translate(windowWidth / 2, windowHeight + TOP_MENU_HEIGHT);
 
   let height = 96;
-  let progressHeight = coinProgress.getConvertedValue(0, height);
+  let progressHeight = pointProgress.getConvertedValue(0, height);
   // animation
   if (scrolledDown) {
-    displayCoinHeight = lerp(displayCoinHeight, progressHeight, 0.05);
+    displayPointHeight = lerp(displayPointHeight, progressHeight, 0.05);
   }
   // visualization
   fill(COLOR_GREY_DARK);
@@ -722,7 +734,7 @@ function displayCoins() {
   stroke(COLOR_GREY_DARK);
   strokeWeight(4);
   fill(COLOR_ORANGE);
-  let tempHeight = Math.round(displayCoinHeight);
+  let tempHeight = Math.round(displayPointHeight);
   if (tempHeight >= 8) {
     rect(-height, (height * 1.05) / 2 - tempHeight / 2, height, tempHeight, 6);
   }
@@ -732,7 +744,7 @@ function displayCoins() {
   fill(COLOR_WHITE);
   textAlign(CENTER, CENTER);
   textSize(20);
-  text(user.info.coins + "/99", -height, height / 3);
+  text(user.info.points + "/99", -height, height / 3);
   textAlign(LEFT, CENTER);
   textSize(48);
   text("Points", height / 2 - MARGIN, 0);
@@ -828,8 +840,7 @@ function displayGiftShop() {
 
 function resetUserStatisticsAnimation() {
   updateStatistics();
-
-  displayCoinsHeight = 0;
+  displayPointHeight = 0;
   scrolledDown = false;
   for (let i = 0; i < infoArray.length; i++) {
     infoArray[i].reset();
@@ -837,15 +848,15 @@ function resetUserStatisticsAnimation() {
 }
 
 function updateStatistics() {
-  coinProgress.value = user.info.coins;
+  pointProgress.value = user.info.points;
   infoTypedKeys.value = user.info.keyStrokes;
   infoCheckedBoxes.value = user.info.checkBoxes;
   user.info.efficiency = getNoteSpaceEifficency();
   infoSpaceEfficiency.value = user.info.efficiency;
-  infoCoinsSpent.value = user.info.coinsSpent;
+  infoPointsEarned.value = user.info.pointsEarned;
   user.info.magnets = magnetContainer;
   infoMagnets.value = user.info.magnets.length;
-  //infoDuration.value = user.info.days;
+  infoDuration.value = user.getDuration();
 }
 
 // update dragged item
@@ -1171,22 +1182,24 @@ function userIsActive(){
   }
 }
 
-function checkUserActivity(){
-  if (userActivity.inactive){
-    if (userActivity.timer === null){
-      userActivity.timer = setTimeout(function(){
-        saveUserData();
-      }, 30000);
-    }
+function autoSave(){
+  if (userActivity.timer === null){
+    userActivity.timer = setTimeout(function(){
+      saveUserData();
+    }, 30000);
   }
 }
 
 function addKeyStrokes(){
-  if (++ sessionStats.keyStrokes === CHAR_WIDTH){
+  if (++ sessionStats.keyStrokes === CHAR_WIDTH * 2){
     sessionStats.keyStrokes = 0;
-    user.info.coins ++;
-    notification.update("You earned 1 coin!");
-    console.log("Coins +1");
+    user.addPoints(1);
+    ++ earnedPoints;
+    if (charGrid.theme != 2 && earnedPoints === 10){
+      notification.update("You earned 10 points!");
+      earnedPoints = 0;
+    }
+    console.log("Points +1");
   }
   user.info.keyStrokes ++;
 }
@@ -1194,9 +1207,13 @@ function addKeyStrokes(){
 function addCheckedBoxes(){
   if (++ sessionStats.checkBoxes === 5){
     sessionStats.checkBoxes = 0;
-    user.info.coins += 1;
-    notification.update("You earned 1 coin!");
-    console.log("Coins +1");
+    user.addPoints(1);
+    ++ earnedPoints;
+    if (charGrid.theme != 2 && earnedPoints === 10){
+      notification.update("You earned 10 points!");
+      earnedPoints = 0;
+    }
+    console.log("Points +1");
   }
   user.info.checkBoxes ++;
 }

@@ -7,11 +7,13 @@ class Notification{
     this.y = MARGIN + this.height/2;
 
     this.xChange = (this.width / 1.25) * 2;
+    this.yChange = 0;
     this.sizeChange = 1;
 
     this.CORNER_RADIUS = 16;
 
-    this.text = "This is a notification.";
+    this.text = "";
+    this.buffer = [];
     this.notify = true;
 
     this.isHovered = false;
@@ -22,20 +24,41 @@ class Notification{
   }
 
   update(text) {
-    this.text = text;
+    if (this.text === ""){
+      this.text = text;
+      this.reset();
+      this.startTimer();
+    }else{
+      this.buffer.push(text);
+    }
+  }
 
+  startTimer(){
+    var thisNote = this;
+    this.timer = setInterval(function() {
+      if (thisNote.buffer.length != 0){
+        thisNote.text = thisNote.buffer.shift();
+        thisNote.reset();
+      }else{
+        thisNote.notify = false;
+        thisNote.endTimer();
+      }
+    }, 5000);
+  }
+
+  reset(){
+    SFX_MSG.play();
     this.xChange = (this.width / 1.25) * 2;
     this.notify = true;
-    var thisNote = this;
-    this.timer = setTimeout(function() {
-      thisNote.notify = false;
-    }, 10000);
+  }
 
-    SFX_MSG.play();
+  endTimer(){
+    clearInterval(this.timer);
+    this.timer = null;
   }
 
   checkForMouse(){
-    if (checkForMouseOver(this.x + this.xChange, this.y, this.width * this.sizeChange, this.height * this.sizeChange) && this.notify){
+    if (checkForMouseOver(this.x + this.xChange, this.y + this.yChange, this.width * this.sizeChange, this.height * this.sizeChange) && this.notify){
       this.isHovered = true;
 
       if (mouseIsPressed){
@@ -44,8 +67,14 @@ class Notification{
         if (this.pressTime < 1){
           this.pressTime += 1;
           this.notify = false;
-          clearTimeout(this.timer);
-          this.timer = null;
+          if (this.buffer.length != 0){
+            this.endTimer();
+            this.text = this.buffer.shift();
+            this.reset();
+            this.startTimer();
+          }else{
+            this.endTimer()
+          }
         }
       }else{
         this.mouseClicked = false;
@@ -57,6 +86,7 @@ class Notification{
   }
 
   display() {
+    this.yChange = lerp(this.yChange, document.documentElement.scrollTop, 0.2);
     this.checkForMouse();
     push();
     rectMode(CENTER);
@@ -76,7 +106,7 @@ class Notification{
     } else {
       this.sizeChange = lerp(this.sizeChange, 1, 0.2)
     }
-    translate(this.x + this.xChange, this.y);
+    translate(this.x + this.xChange, this.y + this.yChange);
     fill(COLOR_BLUE);
     rect(0, 0, this.width * this.sizeChange, this.height * this.sizeChange, this.CORNER_RADIUS);
     fill(COLOR_WHITE);

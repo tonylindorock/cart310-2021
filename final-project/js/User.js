@@ -2,16 +2,17 @@
 class User {
   constructor() {
     this.info = {
-      coins: 0,
+      points: 0,
       keyStrokes: 0,
       checkBoxes: 0,
       efficiency: 0,
-      coinsSpent: 0,
+      pointsEarned: 0,
       magnets: [],
       notes: [],
       startDay: 1,
-      startMonth: 4,
+      startMonth: 3,
       startYear: 2021,
+      todayUsed: false,
       gifts: []
     };
   }
@@ -72,12 +73,20 @@ class User {
       magnet['pos'] = [magnetContainer[i].posX, magnetContainer[i].posY];
       this.info.magnets.push(magnet);
     }
+
     storeItem('user', this.info);
     //console.log(this.info);
   }
 
   getDuration(){
-
+    let thisDay, thisMonth, thisYear
+    thisDay = day();
+    thisMonth = month() - 1;
+    thisYear = year();
+    var thisDate = new Date(thisYear, thisMonth, thisDay);
+    var startDate = new Date(int(this.info.startYear), int(this.info.startMonth), int(this.info.startDay));
+    let difference = (thisDate.getTime() - startDate.getTime())/ (1000 * 3600 * 24) + 1;
+    return difference;
   }
 
   update(key, value) {
@@ -86,11 +95,20 @@ class User {
     }
   }
 
-  useCoins(amount){
-    if (this.info.coins >= amount){
-      this.info.coins -= amount;
+  usePoints(amount){
+    if (this.info.points >= amount){
+      this.info.points -= amount;
       return true;
     }
     return false;
+  }
+
+  addPoints(amount){
+    this.info.points += amount;
+    this.info.pointsEarned += amount
+    if (this.info.points > 99){
+      this.info.points = 99;
+      notification.update("Your points bank is full. Spend it!");
+    }
   }
 }
