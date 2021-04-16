@@ -13,6 +13,8 @@ https://webfonts.ffonts.net/04b03.font.download
 
 SOUND purchase FROM:
 https://www.youtube.com/watch?v=4kVTqUxJYBA
+SOUND message FROM:
+YouTube Audio Library
 ******************/
 
 const CHAR_WIDTH = 34;
@@ -94,7 +96,8 @@ let AWARD_ONE_HUNDREN;
 let AWARD_ROCKET;
 
 let GIFT_ROCKET;
-
+// ********************************
+// **************** SOUNDS ****************
 let SFX_DELETE;
 let SFX_TYPING_0;
 let SFX_TYPING_1;
@@ -103,6 +106,7 @@ let SFX_TYPING_3;
 let SFX_BEEP;
 let SFX_CREATENOTE;
 let SFX_PURCHASE;
+let SFX_MSG;
 // ********************************
 
 let currentItemIndex = 0;
@@ -225,6 +229,7 @@ function preload() {
   SFX_BEEP = loadSound("assets/sounds/beep.mp3");
   SFX_CREATENOTE = loadSound("assets/sounds/create.mp3");
   SFX_PURCHASE = loadSound("assets/sounds/purchase.mp3");
+  SFX_MSG = loadSound("assets/sounds/message.mp3");
 }
 
 // setup main screen
@@ -282,6 +287,7 @@ function setupSounds() {
   SFX_BEEP.setVolume(0.1);
   SFX_CREATENOTE.setVolume(0.1);
   SFX_PURCHASE.setVolume(0.3);
+  SFX_MSG.setVolume(0.2);
 }
 
 function setupUser() {
@@ -299,7 +305,7 @@ function setupUser() {
   infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoCoinsSpent, infoMagnets, infoDuration];
 
   notification = new Notification();
-  notification.update("Welcome");
+  notification.update("Hello! Welcome to Noteeboardd!");
 
   setupGiftShop();
 }

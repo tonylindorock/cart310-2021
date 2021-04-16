@@ -9,30 +9,33 @@ class DraggableAward extends Draggable {
     this.iconId = awardIcons.indexOf(image);
 
     this.ENLARGER_RADIO = 1.05;
+    this.sizeChange = 1;
   }
 
   // button style
   normalStyle() {
+    this.sizeChange = lerp(this.sizeChange, 1, 0.2);
     push();
     drawingContext.shadowOffsetX = 0;
     drawingContext.shadowOffsetY = 4;
     drawingContext.shadowBlur = 10;
     drawingContext.shadowColor = SHADE_STICKER_SHADOW;
-    ellipse(0, 0, AWARD_SIZE);
+    ellipse(0, 0, AWARD_SIZE * this.sizeChange);
     pop();
-    image(this.image, 0, 0, AWARD_ICON_SIZE, AWARD_ICON_SIZE);
+    image(this.image, 0, 0, AWARD_ICON_SIZE * this.sizeChange, AWARD_ICON_SIZE * this.sizeChange);
   }
 
   // button style when hovered
   hoverStyle() {
+    this.sizeChange = lerp(this.sizeChange, this.ENLARGER_RADIO, 0.4);
     push();
     drawingContext.shadowOffsetX = 0;
     drawingContext.shadowOffsetY = 4;
     drawingContext.shadowBlur = 10;
     drawingContext.shadowColor = SHADE_STICKER_SHADOW;
-    ellipse(0, 0, AWARD_SIZE * this.ENLARGER_RADIO);
+    ellipse(0, 0, AWARD_SIZE * this.sizeChange);
     pop();
-    image(this.image, 0, 0, AWARD_ICON_SIZE * this.ENLARGER_RADIO, AWARD_ICON_SIZE * this.ENLARGER_RADIO);
+    image(this.image, 0, 0, AWARD_ICON_SIZE * this.sizeChange , AWARD_ICON_SIZE * this.sizeChange );
   }
 
   // button style when clicked

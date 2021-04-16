@@ -1,7 +1,7 @@
 class Notification{
   constructor() {
     this.height = TOP_MENU_HEIGHT;
-    this.width = windowWidth/6;
+    this.width = windowWidth/5;
 
     this.x = windowWidth - this.width/2 - MARGIN;
     this.y = MARGIN + this.height/2;
@@ -22,14 +22,16 @@ class Notification{
   }
 
   update(text) {
-    this.xChange = (this.width / 1.25) * 2;
-
     this.text = text;
+
+    this.xChange = (this.width / 1.25) * 2;
     this.notify = true;
     var thisNote = this;
     this.timer = setTimeout(function() {
       thisNote.notify = false;
     }, 10000);
+
+    SFX_MSG.play();
   }
 
   checkForMouse(){
@@ -59,7 +61,7 @@ class Notification{
     push();
     rectMode(CENTER);
     ellipseMode(CENTER);
-    textAlign(CENTER,CENTER);
+    textAlign(CENTER, CENTER);
     if (this.notify) {
       this.xChange = lerp(this.xChange, 0, 0.1);
     } else {
@@ -78,9 +80,10 @@ class Notification{
     fill(COLOR_BLUE);
     rect(0, 0, this.width * this.sizeChange, this.height * this.sizeChange, this.CORNER_RADIUS);
     fill(COLOR_WHITE);
-    textSize(24);
+    textSize(24 * this.sizeChange);
+    textLeading(24 * this.sizeChange);
     textFont(FONT_PLAYFUL);
-    text(this.text, 0, 0, this.width, this.height);
+    text(this.text, 0, 0, (this.width - MARGIN)* this.sizeChange, (this.height - MARGIN/2)* this.sizeChange);
     pop();
   }
 }

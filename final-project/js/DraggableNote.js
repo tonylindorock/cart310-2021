@@ -22,49 +22,52 @@ class DraggableNote extends Draggable{
     this.MARGIN = 16;
     this.ENLARGER_RADIO = 1.05;
     this.scale = 1;
+    this.sizeChange = 1;
 
     this.open = false;
   }
 
 // button style
   normalStyle(){
+    this.sizeChange = lerp(this.sizeChange, 1, 0.2);
     this.scale = 1;
     switch(this.theme){
       case 0:
         fill(this.bgColor);
-        rect(0,0, this.width, this.width, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
+        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
         break;
       case 1:
         stroke(COLOR_GREY_DARK);
         strokeWeight(12);
         fill(COLOR_BLACK);
-        rect(0,0, this.width, this.width);
+        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange);
         noStroke();
         break;
       case 2:
         fill(this.bgColor);
-        rect(0,0, this.width, this.width, this.CORNER_RADIUS_PLAIN);
+        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, this.CORNER_RADIUS_PLAIN);
     }
   }
 
 // button style when hovered
   hoverStyle(){
+    this.sizeChange = lerp(this.sizeChange, this.ENLARGER_RADIO, 0.4);
     this.scale = this.ENLARGER_RADIO;
     switch(this.theme){
       case 0:
         fill(this.bgColor);
-        rect(0,0, this.width*this.ENLARGER_RADIO, this.width*this.ENLARGER_RADIO, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
+        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
         break;
       case 1:
         stroke(COLOR_GREY_DARK);
         strokeWeight(12);
         fill(COLOR_BLACK);
-        rect(0,0, this.width*this.ENLARGER_RADIO, this.width*this.ENLARGER_RADIO);
+        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange);
         noStroke();
         break;
       case 2:
         fill(this.bgColor);
-        rect(0,0, this.width*this.ENLARGER_RADIO, this.width*this.ENLARGER_RADIO, this.CORNER_RADIUS_PLAIN);
+        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, this.CORNER_RADIUS_PLAIN);
     }
   }
 
