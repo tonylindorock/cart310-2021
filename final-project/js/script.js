@@ -93,10 +93,13 @@ let ICON_TEXTCOLOR;
 let ICON_BGCOLOR;
 
 let AWARD_FIRST_USE;
-let AWARD_ONE_HUNDREN;
+let AWARD_LIGHTBULB;
 let AWARD_ROCKET;
+let AWARDS;
 
 let GIFT_ROCKET;
+let GIFT_LIGHTBULB;
+let GIFTS;
 // ********************************
 // **************** SOUNDS ****************
 let SFX_DELETE;
@@ -160,8 +163,6 @@ let hoveredDraggables = [];
 
 let noteContainer = [];
 
-let awardIcons = [];
-
 let user;
 let charGrid;
 let pointProgress;
@@ -217,11 +218,14 @@ function preload() {
   ICON_TEXTCOLOR = loadImage("assets/images/icon_text.png");
   ICON_BGCOLOR = loadImage("assets/images/icon_bg.png");
 
-  AWARD_ONE_HUNDREN = loadImage("assets/images/award_100.png");
   AWARD_FIRST_USE = loadImage("assets/images/award_firstuse.png");
   AWARD_ROCKET = loadImage("assets/images/award_rocket.png");
+  AWARD_LIGHTBULB = loadImage("assets/images/award_lightbulb.png");
+  AWARDS = [AWARD_FIRST_USE, AWARD_ROCKET, AWARD_LIGHTBULB];
 
+  GIFT_LIGHTBULB = loadImage("assets/images/gift_lightbulb.png");
   GIFT_ROCKET = loadImage("assets/images/gift_rocket.png");
+  GIFTS = [GIFT_ROCKET, GIFT_LIGHTBULB];
 
   SFX_DELETE = loadSound("assets/sounds/delete.mp3");
   SFX_TYPING_0 = loadSound("assets/sounds/typing_1.mp3");
@@ -240,7 +244,6 @@ function setup() {
   noStroke();
 
   TOP_MENU_HEIGHT = windowHeight / 8.5;
-  awardIcons = [AWARD_FIRST_USE, AWARD_ROCKET];
 
   setupUser();
   setupSounds();
@@ -293,6 +296,7 @@ function setupSounds() {
 
 function setupUser() {
   user = new User();
+  user.addPoints(99);
   pointProgress = new Progress(0, user.info.points, 99);
 
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
@@ -315,7 +319,12 @@ function setupGiftShop() {
   let w = INFO_SQUARE_SIZE * 3 + MARGIN;
   let h = INFO_SQUARE_SIZE * 2 + MARGIN / 2;
   let size = 160;
-  btnGift0 = new ButtonIcon(translateX + w / 2 - 80 - MARGIN / 2, translateY + h / 2 - MARGIN, size, size, ICON_NOTE_TERMINAL);
+
+  let gift = new GiftItem(0);
+  giftShop.item0Price = gift.price;
+  giftShop.item0 = gift.func;
+  giftShop.item0Des = gift.des;
+  btnGift0 = new ButtonIcon(translateX + w / 2 - 80 - MARGIN / 2, translateY + h / 2 - MARGIN, size, size, gift.icon);
   btnGift0.rotateIcon();
   btnGift0.connectFunc(function() {
     if (user.usePoints(giftShop.item0Price)) {
@@ -329,7 +338,12 @@ function setupGiftShop() {
     }
   });
   btnGift0.tooltip = giftShop.item0Des;
-  btnGift1 = new ButtonIcon(translateX + w / 2 + 80 + MARGIN / 2, translateY + h / 2 - MARGIN, size, size, GIFT_ROCKET);
+
+  gift = new GiftItem(1);
+  giftShop.item1Price = gift.price;
+  giftShop.item1 = gift.func;
+  giftShop.item1Des = gift.des;
+  btnGift1 = new ButtonIcon(translateX + w / 2 + 80 + MARGIN / 2, translateY + h / 2 - MARGIN, size, size, gift.icon);
   btnGift1.rotateIcon();
   btnGift1.connectFunc(function() {
     if (user.usePoints(giftShop.item1Price)) {
@@ -343,13 +357,6 @@ function setupGiftShop() {
     }
   });
   btnGift1.tooltip = giftShop.item1Des;
-
-  giftShop.item0 = function() {
-    btnTerminal.disabled = false;
-  };
-  giftShop.item1 = function() {
-    addAward(COLOR_RED, AWARD_ROCKET);
-  };
 }
 
 // setup all the main menu buttons
@@ -690,7 +697,7 @@ function displayTooltip() {
   if (mouseX > windowWidth - textWidth(currentTooltip)) {
     tipPosX -= textWidth(currentTooltip);
   }
-  text(currentTooltip, tipPosX, tipPosY);
+  text(currentTooltip.toUpperCase(), tipPosX, tipPosY);
   pop();
 }
 

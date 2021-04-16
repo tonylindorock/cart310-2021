@@ -13,6 +13,7 @@ class User {
       startMonth: 3,
       startYear: 2021,
       todayUsed: false,
+      themesObtained: [],
       gifts: []
     };
   }
