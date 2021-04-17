@@ -255,7 +255,6 @@ function setup() {
   } else {
     setupContinuedUse();
   }
-  setupGiftShop();
 
   setupMainMenuBtns();
   setupNoteEditorBtns();
@@ -317,14 +316,20 @@ function setupUser() {
 
 function setupGiftShop() {
   let lastSoldOut = false;
-  if (user.info.gifts[0] === -1 && user.info.gifts[1] === -1 && !user.info.todayUsed) {
+  if (user.info.gifts[0] === -1 && user.info.gifts[1] === -1 && isNewDay()) {
     lastSoldOut = true;
   }
+
   if (user.info.gifts[0] >= 0) {
     setupGiftItem(0, user.info.gifts[0]);
   } else {
     if (lastSoldOut) {
-      setupGiftItem(0, user.info.themesObtained.includes(0) ? 1 : 0);
+      let r = int(random(0,2));
+      if (user.info.themesObtained.includes(r)){
+        setupGiftItem(0, int(random(2, 4)));
+      }else{
+        setupGiftItem(0, r);
+      }
     } else {
       giftShop.item0Sold = true;
     }
@@ -561,11 +566,13 @@ function setupFirstUse() {
   user.info.startDay = day();
   user.info.startMonth = month() - 1;
   user.info.startYear = year();
-  user.info.todayUsed = true;
+  user.info.lastDay = user.info.startDay;
+  user.info.lastMonth = user.info.startMonth;
+  user.info.lastYear = user.info.startYear;
 
   notification.update("Hello! Welcome to Noteeboardd!");
   notification.update("You get 99 points for being a beta tester!");
-  user.addPoints(99);
+  user.addPoints(100);
   notification.update("Start typing!");
 
   let titles = ["Double click to open a sticky note", "Drag the note to the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and the gift shop", "Remove all your data by pressing the button in the top left corner"];
@@ -598,14 +605,19 @@ function setupFirstUse() {
   let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
   let magnet = new DraggableAward(rX, rY, COLOR_RED, AWARD_FIRST_USE, getItemId());
   magnetContainer.push(magnet);
+
+  setupGiftShop();
 }
 
 function setupContinuedUse() {
   notification.update("Hello! Welcome back!");
-  if (!user.info.todayUsed) {
+  setupGiftShop();
+  if (isNewDay()){
+    user.info.lastDay = day();
+    user.info.lastMonth = month() - 1;
+    user.info.lastYear = year();
     notification.update("Here's your daily 10 points!");
     user.addPoints(10);
-    user.info.todayUsed = true;
   }
   loadContainers();
 }
@@ -1282,4 +1294,24 @@ function addCheckedBoxes() {
   }
 
   user.info.checkBoxes++;
+}
+
+function getToday(){
+  let thisDay, thisMonth, thisYear
+  thisDay = day();
+  thisMonth = month() - 1;
+  thisYear = year();
+  var thisDate = new Date(thisYear, thisMonth, thisDay);
+  return thisDate;
+}
+
+function isNewDay(){
+  if (user.info.lastDay != getToday().getDate()){
+    return true;
+  }else if (user.info.lastMonth != getToday().getMonth()){
+    return true;
+  }else if (user.info.lastYear != getToday().getFullYear()){
+    return true;
+  }
+  return false;
 }

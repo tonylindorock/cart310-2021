@@ -12,7 +12,9 @@ class User {
       startDay: 1,
       startMonth: 3,
       startYear: 2021,
-      todayUsed: false,
+      lastDay: 1,
+      lastMonth: 3,
+      lastYear: 2021,
       themesObtained: [],
       gifts: [0, 1]
     };
@@ -103,11 +105,7 @@ class User {
   }
   // get usage duration
   getDuration() {
-    let thisDay, thisMonth, thisYear
-    thisDay = day();
-    thisMonth = month() - 1;
-    thisYear = year();
-    var thisDate = new Date(thisYear, thisMonth, thisDay);
+    var thisDate = getToday();
     var startDate = new Date(int(this.info.startYear), int(this.info.startMonth), int(this.info.startDay));
     let difference = (thisDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) + 1;
     return difference;
@@ -124,8 +122,8 @@ class User {
   addPoints(amount) {
     this.info.points += amount;
     this.info.pointsEarned += amount
-    if (this.info.points > 99) {
-      this.info.points = 99;
+    if (this.info.points >= 99) {
+      //this.info.points = 99;
       notification.update("Your points bank is full. Spend it!");
     }
   }
