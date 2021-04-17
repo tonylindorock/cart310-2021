@@ -1,6 +1,6 @@
 // draggable note thumbnail
-class DraggableNote extends Draggable{
-  constructor(x, y, bgColor, textColor, theme, title, id){
+class DraggableNote extends Draggable {
+  constructor(x, y, bgColor, textColor, theme, title, id) {
     super(x, y, NOTE_THUMBNIAL_SIZE, NOTE_THUMBNIAL_SIZE, "NOTE", id);
 
     this.title = title;
@@ -11,9 +11,9 @@ class DraggableNote extends Draggable{
 
     this.font = "Courier";
 
-    if (this.theme === 0){
+    if (this.theme === 0) {
       this.font = FONT_PLAYFUL;
-    }else if (this.theme === 1){
+    } else if (this.theme === 1) {
       this.font = FONT_TERMINAL;
     }
 
@@ -27,57 +27,57 @@ class DraggableNote extends Draggable{
     this.open = false;
   }
 
-// button style
-  normalStyle(){
+  // button style
+  normalStyle() {
     this.sizeChange = lerp(this.sizeChange, 1, 0.2);
     this.scale = 1;
-    switch(this.theme){
+    switch (this.theme) {
       case 0:
         fill(this.bgColor);
-        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
+        rect(0, 0, this.width * this.sizeChange, this.width * this.sizeChange, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
         break;
       case 1:
         stroke(COLOR_GREY_DARK);
         strokeWeight(12);
         fill(COLOR_BLACK);
-        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange);
+        rect(0, 0, this.width * this.sizeChange, this.width * this.sizeChange);
         noStroke();
         break;
       case 2:
         fill(this.bgColor);
-        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, this.CORNER_RADIUS_PLAIN);
+        rect(0, 0, this.width * this.sizeChange, this.width * this.sizeChange, this.CORNER_RADIUS_PLAIN);
     }
   }
 
-// button style when hovered
-  hoverStyle(){
+  // button style when hovered
+  hoverStyle() {
     this.sizeChange = lerp(this.sizeChange, this.ENLARGER_RADIO, 0.4);
     this.scale = this.ENLARGER_RADIO;
-    switch(this.theme){
+    switch (this.theme) {
       case 0:
         fill(this.bgColor);
-        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
+        rect(0, 0, this.width * this.sizeChange, this.width * this.sizeChange, 0, 0, this.CORNER_RADIUS_PLAYFUL, 0);
         break;
       case 1:
         stroke(COLOR_GREY_DARK);
         strokeWeight(12);
         fill(COLOR_BLACK);
-        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange);
+        rect(0, 0, this.width * this.sizeChange, this.width * this.sizeChange);
         noStroke();
         break;
       case 2:
         fill(this.bgColor);
-        rect(0,0, this.width*this.sizeChange, this.width*this.sizeChange, this.CORNER_RADIUS_PLAIN);
+        rect(0, 0, this.width * this.sizeChange, this.width * this.sizeChange, this.CORNER_RADIUS_PLAIN);
     }
   }
 
-// button style when clicked
-  clickStyle(){
+  // button style when clicked
+  clickStyle() {
     this.normalStyle();
   }
 
 
-  display(){
+  display() {
     this.checkForMouse();
     this.checkForDrag();
     push();
@@ -90,13 +90,13 @@ class DraggableNote extends Draggable{
     drawingContext.shadowOffsetY = 4;
     drawingContext.shadowBlur = 25;
     drawingContext.shadowColor = SHADE_NOTE_SHADOW;
-    if (this.isHovered){
-      if (this.mouseClicked){
+    if (this.isHovered) {
+      if (this.mouseClicked) {
         this.clickStyle();
-      }else{
+      } else {
         this.hoverStyle();
       }
-    }else{
+    } else {
       this.normalStyle();
     }
     pop();
@@ -106,7 +106,7 @@ class DraggableNote extends Draggable{
     textSize(16 * this.scale);
     //rect((-this.width/2 + this.MARGIN) * this.scale, (-this.width/2 + this.MARGIN) * this.scale, (this.width - this.MARGIN*2)* this.scale, (this.width - this.MARGIN*2)* this.scale);
     fill(this.textColor);
-    text(this.title, (-this.width/2 + this.MARGIN) * this.scale, (-this.width/2 + this.MARGIN) * this.scale, (this.width - this.MARGIN*2)* this.scale, (this.width - this.MARGIN*2)* this.scale);
+    text(this.title, (-this.width / 2 + this.MARGIN) * this.scale, (-this.width / 2 + this.MARGIN) * this.scale, (this.width - this.MARGIN * 2) * this.scale, (this.width - this.MARGIN * 2) * this.scale);
     pop();
   }
 }

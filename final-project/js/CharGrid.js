@@ -61,11 +61,8 @@ class CharGrid {
     let valid = true;
     // if end of the line, add a new line
     if (this.pointerPosX === CHAR_WIDTH) {
-      if (this.pointerPosY != CHAR_HEIGHT - 1) {
-        this.pointerPosY += 1;
-        this.pointerPosX = 0;
-        this.lines.push("");
-        this.characters.push([]);
+      if (this.pointerPosY < CHAR_HEIGHT - 1) {
+        this.nextLine();
         // if no space
       } else {
         valid = false;
@@ -77,6 +74,7 @@ class CharGrid {
       let newChar = new Character(this.pointerPosX, this.pointerPosY, character, special);
       newChar.underlineEnabled = this.underlineEnabled;
       newChar.highlightEnabled = this.highlightEnabled;
+      // playful note animation
       if (this.theme === 0) {
         newChar.startAnimation();
       }
@@ -85,16 +83,25 @@ class CharGrid {
       //console.log(character + " New char added at "+ this.pointerPosX + " " + this.pointerPosY);
       if (character === "\n") {
         if (this.pointerPosY < CHAR_HEIGHT - 1) {
-          this.pointerPosY += 1;
-          this.pointerPosX = 0;
-          this.lines.push("");
-          this.characters.push([]);
+          this.nextLine();
         }
       } else {
         this.pointerPosX += 1;
+        // go to next if end of the line after adding a character
+        if (this.pointerPosX === CHAR_WIDTH && this.pointerPosY < CHAR_HEIGHT - 1){
+          this.nextLine();
+        }
       }
     }
   }
+  // go to the next line
+  nextLine(){
+    this.pointerPosY += 1;
+    this.pointerPosX = 0;
+    this.lines.push("");
+    this.characters.push([]);
+  }
+
   // add line of characters
   addLine(line) {
     for (let j = 0; j < line.length; j++) {
@@ -116,14 +123,19 @@ class CharGrid {
   // remove a character
   removeChar() {
     this.keyIsTyped = true;
+    // if the pointer is at the begin of a line
+    // goes to the previous line end
     if (this.pointerPosX === 0) {
       if (this.pointerPosY > 0) {
         this.pointerPosY -= 1;
         this.lines.pop();
         this.characters.pop();
+
         let temp = this.lines[this.pointerPosY];
-        this.lines[this.pointerPosY] = temp.substring(0, temp.length - 1);
-        this.characters[this.pointerPosY].pop();
+        if (temp[temp.length - 1] === "\n"){
+          this.lines[this.pointerPosY] = temp.substring(0, temp.length - 1);
+          this.characters[this.pointerPosY].pop();
+        }
       }
       this.tempPointPosX = this.pointerPosX;
       this.pointerPosX = this.lines[this.pointerPosY].length;

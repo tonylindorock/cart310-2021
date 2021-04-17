@@ -35,7 +35,7 @@ class DraggableAward extends Draggable {
     drawingContext.shadowColor = SHADE_STICKER_SHADOW;
     ellipse(0, 0, AWARD_SIZE * this.sizeChange);
     pop();
-    image(this.image, 0, 0, AWARD_ICON_SIZE * this.sizeChange , AWARD_ICON_SIZE * this.sizeChange );
+    image(this.image, 0, 0, AWARD_ICON_SIZE * this.sizeChange, AWARD_ICON_SIZE * this.sizeChange);
   }
 
   // button style when clicked

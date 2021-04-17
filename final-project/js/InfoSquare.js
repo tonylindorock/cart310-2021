@@ -17,7 +17,7 @@ class InfoSquare {
     this.MARGIN = 20;
   }
 
-  reset(){
+  reset() {
     this.displayVal = 0;
     this.scrolledDown = false;
   }
@@ -36,11 +36,11 @@ class InfoSquare {
     // value
     fill(this.color);
     textSize(48);
-    if (Math.round(this.displayVal) >= 1000){
+    if (Math.round(this.displayVal) >= 1000) {
       this.displayValShortened = this.shortenValue(Math.round(this.displayVal));
-      text(this.displayValShortened + this.sign, this.posX + this.MARGIN, this.posY + INFO_SQUARE_SIZE/2 - this.MARGIN/1.5);
-    }else{
-      text(Math.round(this.displayVal) + this.sign, this.posX + this.MARGIN, this.posY + INFO_SQUARE_SIZE/2 - this.MARGIN/1.5);
+      text(this.displayValShortened + this.sign, this.posX + this.MARGIN, this.posY + INFO_SQUARE_SIZE / 2 - this.MARGIN / 1.5);
+    } else {
+      text(Math.round(this.displayVal) + this.sign, this.posX + this.MARGIN, this.posY + INFO_SQUARE_SIZE / 2 - this.MARGIN / 1.5);
     }
     // unit
     textSize(16);
@@ -56,10 +56,10 @@ class InfoSquare {
     }
   }
 
-  shortenValue(val){
+  shortenValue(val) {
     let valDisplay;
     if (val >= 1000 && val <= 9999) {
-      let temp =int(val).toString()[0]; // extract frist character from 1000-9999
+      let temp = int(val).toString()[0]; // extract frist character from 1000-9999
       valDisplay = temp + "K";
     } else if (val >= 10000 && val <= 99999) {
       let temp = int(val).toString().substring(0, 2); // extract frist 2 characters from 10000-99999

@@ -252,14 +252,8 @@ function setup() {
   setupUser();
   if (!loadUserData()) {
     setupFirstUse();
-  }else{
-    notification.update("Hello! Welcome back!");
-    if (!user.info.todayUsed){
-      notification.update("Here's your daily 10 points!");
-      user.addPoints(10);
-      user.info.todayUsed = true;
-    }
-    loadContainers();
+  } else {
+    setupContinuedUse();
   }
   setupGiftShop();
 
@@ -307,7 +301,6 @@ function setupSounds() {
 
 function setupUser() {
   user = new User();
-  user.addPoints(99);
   pointProgress = new Progress(0, user.info.points, 99);
 
   infoTypedKeys = new InfoSquare(0, 0, "Typed", 11, "Keystroke(s)", COLOR_BLUE);
@@ -323,6 +316,31 @@ function setupUser() {
 }
 
 function setupGiftShop() {
+  let lastSoldOut = false;
+  if (user.info.gifts[0] === -1 && user.info.gifts[1] === -1 && !user.info.todayUsed) {
+    lastSoldOut = true;
+  }
+  if (user.info.gifts[0] >= 0) {
+    setupGiftItem(0, user.info.gifts[0]);
+  } else {
+    if (lastSoldOut) {
+      setupGiftItem(0, user.info.themesObtained.includes(0) ? 1 : 0);
+    } else {
+      giftShop.item0Sold = true;
+    }
+  }
+  if (user.info.gifts[1] >= 0) {
+    setupGiftItem(1, user.info.gifts[1]);
+  } else {
+    if (lastSoldOut) {
+      setupGiftItem(1, int(random(2, 4)));
+    } else {
+      giftShop.item1Sold = true;
+    }
+  }
+}
+
+function setupGiftItem(id, uniqueId) {
   let translateX = windowWidth / 2 + MARGIN;
   let translateY = windowHeight + TOP_MENU_HEIGHT * 4;
   let w = INFO_SQUARE_SIZE * 3 + MARGIN;
@@ -330,8 +348,8 @@ function setupGiftShop() {
   let size = 160;
 
   let gift;
-  if (user.info.gifts[0] >= 0){
-    gift = new GiftItem(user.info.gifts[0]);
+  if (id === 0) {
+    gift = new GiftItem(uniqueId);
     giftShop.item0Price = gift.price;
     giftShop.item0 = gift.func;
     giftShop.item0Id = gift.id;
@@ -343,19 +361,14 @@ function setupGiftShop() {
         //btnGift0.disabled = true;
         btnGift0.forget();
         giftShop.item0();
-
         updateStatistics();
         SFX_PURCHASE.play();
         saveUserData();
       }
     });
     btnGift0.tooltip = gift.des;
-  }else{
-    giftShop.item0Sold = true;
-  }
-
-  if (user.info.gifts[1] >= 0){
-    gift = new GiftItem(user.info.gifts[1]);
+  } else {
+    gift = new GiftItem(uniqueId);
     giftShop.item1Price = gift.price;
     giftShop.item1 = gift.func;
     giftShop.item1Id = gift.id;
@@ -374,8 +387,6 @@ function setupGiftShop() {
       }
     });
     btnGift1.tooltip = gift.des;
-  }else{
-    giftShop.item1Sold = true;
   }
 }
 
@@ -393,13 +404,13 @@ function setupMainMenuBtns() {
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
   btnPlayful.rotateIcon();
-  if (!user.info.themesObtained.includes(0)){
+  if (!user.info.themesObtained.includes(0)) {
     btnPlayful.disabled = true;
   }
 
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
   btnTerminal.rotateIcon();
-  if (!user.info.themesObtained.includes(1)){
+  if (!user.info.themesObtained.includes(1)) {
     btnTerminal.disabled = true;
   }
 
@@ -409,10 +420,10 @@ function setupMainMenuBtns() {
   connectMainMenuBtns();
 }
 
-function connectMainMenuBtns(){
+function connectMainMenuBtns() {
   btnPurge.connectFunc(function() {
     setTimeout(function() {
-      if (confirm("Are you sure you want to purge all data?")){
+      if (confirm("Are you sure you want to purge all data?")) {
         removeItem('user');
         location.reload();
         console.log("All data erased!");
@@ -540,7 +551,7 @@ function connectEditorBtns() {
       btnTextColor.colorIndex = 0;
     }
     charGrid.textColor = btnTextColor.colorProfile[btnTextColor.colorIndex];
-    if (charGrid.theme === 1){
+    if (charGrid.theme === 1) {
       charGrid.updateMarkupColor();
     }
   });
@@ -583,6 +594,16 @@ function setupFirstUse() {
   let rY = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowHeight - NOTE_THUMBNIAL_SIZE - MARGIN);
   let magnet = new DraggableAward(rX, rY, COLOR_RED, AWARD_FIRST_USE, getItemId());
   magnetContainer.push(magnet);
+}
+
+function setupContinuedUse() {
+  notification.update("Hello! Welcome back!");
+  if (!user.info.todayUsed) {
+    notification.update("Here's your daily 10 points!");
+    user.addPoints(10);
+    user.info.todayUsed = true;
+  }
+  loadContainers();
 }
 
 function displayNoteThumbnails() {
@@ -740,7 +761,7 @@ function displayUserInfo() {
   textAlign(RIGHT);
   textFont(FONT_PLAYFUL);
   textSize(20);
-  text(CHAR_WIDTH * 2 + " keystrokes = 1 point\n5 checked checkboxes = 1 point\nevery day +2 points", windowWidth - MARGIN, windowHeight + MARGIN*1.5);
+  text(CHAR_WIDTH * 2 + " keystrokes = 1 point\n5 checked checkboxes = 1 point\nevery day +10 points", windowWidth - MARGIN, windowHeight + MARGIN * 1.5);
   pop();
   displayPoints();
   displayStatistics();
@@ -823,17 +844,17 @@ function displayGiftShop() {
   textAlign(LEFT, CENTER);
   fill(COLOR_GREY);
   textSize(20);
-  if (giftShop.item0Sold && giftShop.item1Sold){
+  if (giftShop.item0Sold && giftShop.item1Sold) {
     text("New items will be available tomorrow", MARGIN / 2, h - MARGIN);
-  }else{
+  } else {
     text("These items will be available for 7 days", MARGIN / 2, h - MARGIN);
   }
   pop();
   // items
-  if (!giftShop.item0Sold){
+  if (!giftShop.item0Sold) {
     btnGift0.display();
   }
-  if(!giftShop.item1Sold) {
+  if (!giftShop.item1Sold) {
     btnGift1.display();
   }
 
@@ -930,6 +951,7 @@ function deleteNote(id) {
   trashAnim.deleteDone = true;
   hoveredDraggables = [];
 
+  updateStatistics();
   saveUserData();
   SFX_DELETE.play();
 }
@@ -1159,8 +1181,8 @@ function loadUserData() {
   return result;
 }
 
-function loadContainers(){
-  for(let j = 0; j < user.info.notes.length; j ++){
+function loadContainers() {
+  for (let j = 0; j < user.info.notes.length; j++) {
     let id = user.info.notes[j]['id'];
     let theme = user.info.notes[j]['theme'];
     let bgColor = user.info.notes[j]['bgColor'];
@@ -1171,22 +1193,22 @@ function loadContainers(){
     // add note
     userNote = new CharGrid(theme, bgColor, textColor, id);
     // add lines
-    for (let i = 0; i < user.info.notes[j]['lines'].length; i++){
+    for (let i = 0; i < user.info.notes[j]['lines'].length; i++) {
       userNote.addLine(user.info.notes[j]['lines'][i]);
     }
     // add markup
-    for (let i = 0; i < user.info.notes[j]['markup'].length; i++){
+    for (let i = 0; i < user.info.notes[j]['markup'].length; i++) {
       let x = user.info.notes[j]['markup'][i][0];
       let y = user.info.notes[j]['markup'][i][1];
       let markupType = user.info.notes[j]['markup'][i][2];
       let color = user.info.notes[j]['markup'][i][3];
-      if (markupType === 0){
+      if (markupType === 0) {
         userNote.characters[x][y].underline = true;
         userNote.characters[x][y].underlineColor = color;
-      }else if (markupType === 1){
+      } else if (markupType === 1) {
         userNote.characters[x][y].highlight = true;
         userNote.characters[x][y].highlightColor = color;
-      }else{
+      } else {
         userNote.characters[x][y].setupButton();
         userNote.characters[x][y].char = user.info.notes[j]['markup'][i][3];
       }
@@ -1199,7 +1221,7 @@ function loadContainers(){
     currentItemIndex++;
   }
   // add magnets
-  for(let j = 0; j < user.info.magnets.length; j ++){
+  for (let j = 0; j < user.info.magnets.length; j++) {
     let bgColor = user.info.magnets[j]['bgColor'];
     let id = user.info.magnets[j]['id'];
     let iconId = user.info.magnets[j]['iconId'];
@@ -1216,44 +1238,44 @@ function saveUserData() {
   console.log("User data saved.");
 }
 
-function userIsActive(){
-  if (userActivity.timer != null){
+function userIsActive() {
+  if (userActivity.timer != null) {
     clearTimeout(userActivity.timer);
     userActivity.timer = null;
   }
 }
 
-function autoSave(){
-  if (userActivity.timer === null){
-    userActivity.timer = setTimeout(function(){
+function autoSave() {
+  if (userActivity.timer === null) {
+    userActivity.timer = setTimeout(function() {
       saveUserData();
     }, 10000);
   }
 }
 
-function addKeyStrokes(){
-  if (++ sessionStats.keyStrokes === CHAR_WIDTH * 2){
+function addKeyStrokes() {
+  if (++sessionStats.keyStrokes === CHAR_WIDTH * 2) {
     sessionStats.keyStrokes = 0;
     user.addPoints(1);
     console.log("Points +1");
-    if (++ sessionStats.earnedPoints === 10){
+    if (++sessionStats.earnedPoints === 10) {
       notification.update("You earned 10 points!");
       sessionStats.earnedPoints = 0;
     }
   }
-  user.info.keyStrokes ++;
+  user.info.keyStrokes++;
 }
 
-function addCheckedBoxes(){
-  if (++ sessionStats.checkBoxes === 5){
+function addCheckedBoxes() {
+  if (++sessionStats.checkBoxes === 5) {
     sessionStats.checkBoxes = 0;
     user.addPoints(1);
     console.log("Points +1");
-    if (++ sessionStats.earnedPoints === 10){
+    if (++sessionStats.earnedPoints === 10) {
       notification.update("You earned 10 points!");
       sessionStats.earnedPoints = 0;
     }
   }
 
-  user.info.checkBoxes ++;
+  user.info.checkBoxes++;
 }

@@ -17,11 +17,11 @@ class User {
       gifts: [1, 2]
     };
   }
-
-  loadData(){
+  // load from local storage
+  loadData() {
     let data = getItem('user');
-    if (data != null){
-      for(let k in data){
+    if (data != null) {
+      for (let k in data) {
         this.info[k] = data[k];
       }
       return true;
@@ -29,11 +29,13 @@ class User {
     return false;
   }
 
-  saveData(){
+  saveData() {
+    // empty arrays
     this.info.notes = [];
     this.info.magnets = [];
     this.info.gifts = [];
-    for(let i = 0; i < noteContainer.length; i++){
+    // save notes
+    for (let i = 0; i < noteContainer.length; i++) {
       let noteData = {};
       noteData['id'] = noteContainer[i].id;
       noteData['theme'] = noteContainer[i].theme;
@@ -41,36 +43,42 @@ class User {
       noteData['textColor'] = noteContainer[i].textColor;
       noteData['lines'] = noteContainer[i].lines;
       noteData['markup'] = [];
-      if (noteContainer[i].characters[0][0] != null){
+      // markup and checkboxes
+      if (noteContainer[i].characters[0][0] != null) {
         let markup = [];
         for (let a = 0; a < noteContainer[i].characters.length; a++) {
           for (let b = 0; b < noteContainer[i].characters[a].length; b++) {
-            if (noteContainer[i].characters[a][b].underline){
+            // underline
+            if (noteContainer[i].characters[a][b].underline) {
               markup.push([a, b, 0, noteContainer[i].characters[a][b].underlineColor]);
             }
-            if (noteContainer[i].characters[a][b].highlight){
-              if (noteContainer[i].theme === 1){
+            // highlight
+            if (noteContainer[i].characters[a][b].highlight) {
+              if (noteContainer[i].theme === 1) {
                 markup.push([a, b, 1, noteContainer[i].textColor]);
-              }else{
+              } else {
                 markup.push([a, b, 1, noteContainer[i].characters[a][b].highlightColor]);
               }
             }
-            if (noteContainer[i].characters[a][b].button != null){
+            // checkbox
+            if (noteContainer[i].characters[a][b].button != null) {
               markup.push([a, b, 2, noteContainer[i].characters[a][b].char]);
             }
           }
         }
         noteData['markup'] = markup;
       }
-      for(let j = 0; j < noteThumbnailContainer.length; j++){
-        if(noteData['id'] === noteThumbnailContainer[j].id){
+      // save note thumbnail position
+      for (let j = 0; j < noteThumbnailContainer.length; j++) {
+        if (noteData['id'] === noteThumbnailContainer[j].id) {
           noteData['pos'] = [noteThumbnailContainer[j].posX, noteThumbnailContainer[j].posY];
         }
       }
       this.info.notes.push(noteData);
       //console.log(noteData);
     }
-    for(let i = 0; i < magnetContainer.length; i++){
+    // save magnets
+    for (let i = 0; i < magnetContainer.length; i++) {
       let magnet = {};
       magnet['bgColor'] = magnetContainer[i].bgColor;
       magnet['id'] = magnetContainer[i].id;
@@ -79,44 +87,44 @@ class User {
       this.info.magnets.push(magnet);
     }
     // gift shop
-    if (!giftShop.item0Sold){
+    if (!giftShop.item0Sold) {
       this.info.gifts.push(giftShop.item0Id);
-    }else{
+    } else {
       this.info.gifts.push(-1);
     }
-    if (!giftShop.item1Sold){
+    if (!giftShop.item1Sold) {
       this.info.gifts.push(giftShop.item1Id);
-    }else{
+    } else {
       this.info.gifts.push(-1);
     }
 
     storeItem('user', this.info);
     //console.log(this.info);
   }
-
-  getDuration(){
+  // get usage duration
+  getDuration() {
     let thisDay, thisMonth, thisYear
     thisDay = day();
     thisMonth = month() - 1;
     thisYear = year();
     var thisDate = new Date(thisYear, thisMonth, thisDay);
     var startDate = new Date(int(this.info.startYear), int(this.info.startMonth), int(this.info.startDay));
-    let difference = (thisDate.getTime() - startDate.getTime())/ (1000 * 3600 * 24) + 1;
+    let difference = (thisDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) + 1;
     return difference;
   }
-
-  usePoints(amount){
-    if (this.info.points >= amount){
+  // spend points
+  usePoints(amount) {
+    if (this.info.points >= amount) {
       this.info.points -= amount;
       return true;
     }
     return false;
   }
-
-  addPoints(amount){
+  // add points 
+  addPoints(amount) {
     this.info.points += amount;
     this.info.pointsEarned += amount
-    if (this.info.points > 99){
+    if (this.info.points > 99) {
       this.info.points = 99;
       notification.update("Your points bank is full. Spend it!");
     }
