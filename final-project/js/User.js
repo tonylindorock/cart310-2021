@@ -123,7 +123,7 @@ class User {
     this.info.points += amount;
     this.info.pointsEarned += amount
     if (this.info.points >= 99) {
-      //this.info.points = 99;
+      this.info.points = 99;
       notification.update("Your points bank is full. Spend it!");
     }
   }
