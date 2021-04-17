@@ -17,7 +17,7 @@ class GiftItem {
           btnPlayful.disabled = false;
           user.info.themesObtained.push(0);
         };
-        this.price = 60;
+        this.price = 50;
         break;
         // note terminal
       case 1:
@@ -27,7 +27,7 @@ class GiftItem {
           btnTerminal.disabled = false;
           user.info.themesObtained.push(1);
         };
-        this.price = 60;
+        this.price = 50;
         break;
         // magnets
       case 2:

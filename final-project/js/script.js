@@ -564,11 +564,11 @@ function setupFirstUse() {
   user.info.todayUsed = true;
 
   notification.update("Hello! Welcome to Noteeboardd!");
-  notification.update("You get 10 points for being a new user!");
-  user.addPoints(10);
+  notification.update("You get 99 points for being a beta tester!");
+  user.addPoints(99);
   notification.update("Start typing!");
 
-  let titles = ["Double click to open a sticky note", "Drag the note to the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and the gift shop"];
+  let titles = ["Double click to open a sticky note", "Drag the note to the trash can to delete it", "Add a new note in the top right corner", "Scroll down to see your progress and the gift shop", "Remove all your data by pressing the button in the top left corner"];
   for (let i = 0; i < titles.length; i++) {
     let id = getItemId();
     let rX = random(NOTE_THUMBNIAL_SIZE + MARGIN, windowWidth - NOTE_THUMBNIAL_SIZE - MARGIN);
@@ -578,6 +578,10 @@ function setupFirstUse() {
       noteThumbnail = new DraggableNote(rX, rY, COLOR_WHITE, COLOR_BLACK, 2, titles[i], id);
       note = new CharGrid(2, COLOR_WHITE, COLOR_BLACK, id);
     } else if (i === 3) {
+      let randColor = random(COLORS_THEME);
+      noteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, randColor, 1, titles[i], id);
+      note = new CharGrid(1, COLOR_BLACK, randColor, id);
+    }else if (i === 4) {
       let randColor = random(COLORS_THEME);
       noteThumbnail = new DraggableNote(rX, rY, COLOR_BLACK, randColor, 1, titles[i], id);
       note = new CharGrid(1, COLOR_BLACK, randColor, id);

@@ -14,7 +14,7 @@ class User {
       startYear: 2021,
       todayUsed: false,
       themesObtained: [],
-      gifts: [1, 2]
+      gifts: [0, 1]
     };
   }
   // load from local storage
@@ -120,7 +120,7 @@ class User {
     }
     return false;
   }
-  // add points 
+  // add points
   addPoints(amount) {
     this.info.points += amount;
     this.info.pointsEarned += amount
