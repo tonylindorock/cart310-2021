@@ -121,6 +121,9 @@ class CharGrid {
         this.pointerPosY -= 1;
         this.lines.pop();
         this.characters.pop();
+        let temp = this.lines[this.pointerPosY];
+        this.lines[this.pointerPosY] = temp.substring(0, temp.length - 1);
+        this.characters[this.pointerPosY].pop();
       }
       this.tempPointPosX = this.pointerPosX;
       this.pointerPosX = this.lines[this.pointerPosY].length;

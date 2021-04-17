@@ -48,6 +48,7 @@ class Draggable {
         this.mouseClicked = false;
         // reset selected item
         if (selectedItem.id === this.id && selectedItem.type === this.type) {
+          saveUserData();
           updateSelectedItem("", -1);
         }
       }

@@ -111,6 +111,7 @@ let SFX_BEEP;
 let SFX_CREATENOTE;
 let SFX_PURCHASE;
 let SFX_MSG;
+let SFX_NO_POINTS;
 // ********************************
 
 let currentItemIndex = 0;
@@ -132,8 +133,8 @@ let giftShop = {
   item1Sold: false,
   item0Price: 60,
   item1Price: 40,
-  item0Des: "ENABLE TERMINAL NOTE",
-  item1Des: "OBTAIN A DECORATIVE MAGNET",
+  item0Id: 1,
+  item1Id: 2,
   item0: null,
   item1: null
 }
@@ -236,6 +237,7 @@ function preload() {
   SFX_CREATENOTE = loadSound("assets/sounds/create.mp3");
   SFX_PURCHASE = loadSound("assets/sounds/purchase.mp3");
   SFX_MSG = loadSound("assets/sounds/message.mp3");
+  SFX_NO_POINTS = loadSound("assets/sounds/not_enough_points.mp3");
 }
 
 // setup main screen
@@ -245,17 +247,25 @@ function setup() {
 
   TOP_MENU_HEIGHT = windowHeight / 8.5;
 
-  setupUser();
   setupSounds();
 
-  setupMainMenuBtns();
-  setupNoteEditorBtns();
+  setupUser();
   if (!loadUserData()) {
     setupFirstUse();
   }else{
     notification.update("Hello! Welcome back!");
+    if (!user.info.todayUsed){
+      notification.update("Here's your daily 10 points!");
+      user.addPoints(10);
+      user.info.todayUsed = true;
+    }
     loadContainers();
   }
+  setupGiftShop();
+
+  setupMainMenuBtns();
+  setupNoteEditorBtns();
+
   updateStatistics();
 }
 
@@ -292,6 +302,7 @@ function setupSounds() {
   SFX_CREATENOTE.setVolume(0.1);
   SFX_PURCHASE.setVolume(0.3);
   SFX_MSG.setVolume(0.2);
+  SFX_NO_POINTS.setVolume(0.08);
 }
 
 function setupUser() {
@@ -309,8 +320,6 @@ function setupUser() {
   infoArray = [infoTypedKeys, infoCheckedBoxes, infoSpaceEfficiency, infoPointsEarned, infoMagnets, infoDuration];
 
   notification = new Notification();
-
-  setupGiftShop();
 }
 
 function setupGiftShop() {
@@ -320,43 +329,54 @@ function setupGiftShop() {
   let h = INFO_SQUARE_SIZE * 2 + MARGIN / 2;
   let size = 160;
 
-  let gift = new GiftItem(0);
-  giftShop.item0Price = gift.price;
-  giftShop.item0 = gift.func;
-  giftShop.item0Des = gift.des;
-  btnGift0 = new ButtonIcon(translateX + w / 2 - 80 - MARGIN / 2, translateY + h / 2 - MARGIN, size, size, gift.icon);
-  btnGift0.rotateIcon();
-  btnGift0.connectFunc(function() {
-    if (user.usePoints(giftShop.item0Price)) {
-      giftShop.item0Sold = true;
-      btnGift0.disabled = true;
-      btnGift0.forget();
-      giftShop.item0();
+  let gift;
+  if (user.info.gifts[0] >= 0){
+    gift = new GiftItem(user.info.gifts[0]);
+    giftShop.item0Price = gift.price;
+    giftShop.item0 = gift.func;
+    giftShop.item0Id = gift.id;
+    btnGift0 = new ButtonIcon(translateX + w / 2 - 80 - MARGIN / 2, translateY + h / 2 - MARGIN, size, size, gift.icon);
+    btnGift0.rotateIcon();
+    btnGift0.connectFunc(function() {
+      if (user.usePoints(giftShop.item0Price)) {
+        giftShop.item0Sold = true;
+        //btnGift0.disabled = true;
+        btnGift0.forget();
+        giftShop.item0();
 
-      updateStatistics();
-      SFX_PURCHASE.play();
-    }
-  });
-  btnGift0.tooltip = giftShop.item0Des;
+        updateStatistics();
+        SFX_PURCHASE.play();
+        saveUserData();
+      }
+    });
+    btnGift0.tooltip = gift.des;
+  }else{
+    giftShop.item0Sold = true;
+  }
 
-  gift = new GiftItem(1);
-  giftShop.item1Price = gift.price;
-  giftShop.item1 = gift.func;
-  giftShop.item1Des = gift.des;
-  btnGift1 = new ButtonIcon(translateX + w / 2 + 80 + MARGIN / 2, translateY + h / 2 - MARGIN, size, size, gift.icon);
-  btnGift1.rotateIcon();
-  btnGift1.connectFunc(function() {
-    if (user.usePoints(giftShop.item1Price)) {
-      giftShop.item1Sold = true;
-      btnGift1.disabled = true;
-      btnGift1.forget();
-      giftShop.item1();
+  if (user.info.gifts[1] >= 0){
+    gift = new GiftItem(user.info.gifts[1]);
+    giftShop.item1Price = gift.price;
+    giftShop.item1 = gift.func;
+    giftShop.item1Id = gift.id;
+    btnGift1 = new ButtonIcon(translateX + w / 2 + 80 + MARGIN / 2, translateY + h / 2 - MARGIN, size, size, gift.icon);
+    btnGift1.rotateIcon();
+    btnGift1.connectFunc(function() {
+      if (user.usePoints(giftShop.item1Price)) {
+        giftShop.item1Sold = true;
+        //btnGift1.disabled = true;
+        btnGift1.forget();
+        giftShop.item1();
 
-      updateStatistics();
-      SFX_PURCHASE.play();
-    }
-  });
-  btnGift1.tooltip = giftShop.item1Des;
+        updateStatistics();
+        SFX_PURCHASE.play();
+        saveUserData();
+      }
+    });
+    btnGift1.tooltip = gift.des;
+  }else{
+    giftShop.item1Sold = true;
+  }
 }
 
 // setup all the main menu buttons
@@ -373,11 +393,15 @@ function setupMainMenuBtns() {
   // note theme button
   btnPlayful = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 0.4, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAYFUL);
   btnPlayful.rotateIcon();
-  btnPlayful.disabled = true;
+  if (!user.info.themesObtained.includes(0)){
+    btnPlayful.disabled = true;
+  }
 
   btnTerminal = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_TERMINAL);
   btnTerminal.rotateIcon();
-  btnTerminal.disabled = true;
+  if (!user.info.themesObtained.includes(1)){
+    btnTerminal.disabled = true;
+  }
 
   btnPlain = new ButtonIcon(menuPosX + ADD_MENU_HEIGHT * 1.6, menuPosY + ADD_MENU_HEIGHT / 2 - 16, ADD_MENU_HEIGHT / downSizeRatio, ADD_MENU_HEIGHT / downSizeRatio, ICON_NOTE_PLAIN);
   btnPlain.rotateIcon();
@@ -799,11 +823,17 @@ function displayGiftShop() {
   textAlign(LEFT, CENTER);
   fill(COLOR_GREY);
   textSize(20);
-  text("These items will be available for 7 days", MARGIN / 2, h - MARGIN);
+  if (giftShop.item0Sold && giftShop.item1Sold){
+    text("New items will be available tomorrow", MARGIN / 2, h - MARGIN);
+  }else{
+    text("These items will be available for 7 days", MARGIN / 2, h - MARGIN);
+  }
   pop();
   // items
-  if (!(giftShop.item0Sold && giftShop.item1Sold)) {
+  if (!giftShop.item0Sold){
     btnGift0.display();
+  }
+  if(!giftShop.item1Sold) {
     btnGift1.display();
   }
 
@@ -900,6 +930,7 @@ function deleteNote(id) {
   trashAnim.deleteDone = true;
   hoveredDraggables = [];
 
+  saveUserData();
   SFX_DELETE.play();
 }
 
@@ -1155,6 +1186,9 @@ function loadContainers(){
       }else if (markupType === 1){
         userNote.characters[x][y].highlight = true;
         userNote.characters[x][y].highlightColor = color;
+      }else{
+        userNote.characters[x][y].setupButton();
+        userNote.characters[x][y].char = user.info.notes[j]['markup'][i][3];
       }
     }
     // add thumbnail
@@ -1170,7 +1204,7 @@ function loadContainers(){
     let id = user.info.magnets[j]['id'];
     let iconId = user.info.magnets[j]['iconId'];
     let pos = user.info.magnets[j]['pos'];
-    let magnet = new DraggableAward(pos[0], pos[1], bgColor, awardIcons[iconId], id);
+    let magnet = new DraggableAward(pos[0], pos[1], bgColor, AWARDS[iconId], id);
 
     magnetContainer.push(magnet);
     currentItemIndex++;
@@ -1193,7 +1227,7 @@ function autoSave(){
   if (userActivity.timer === null){
     userActivity.timer = setTimeout(function(){
       saveUserData();
-    }, 30000);
+    }, 10000);
   }
 }
 
@@ -1201,12 +1235,11 @@ function addKeyStrokes(){
   if (++ sessionStats.keyStrokes === CHAR_WIDTH * 2){
     sessionStats.keyStrokes = 0;
     user.addPoints(1);
-    ++ earnedPoints;
-    if (charGrid.theme != 2 && earnedPoints === 10){
-      notification.update("You earned 10 points!");
-      earnedPoints = 0;
-    }
     console.log("Points +1");
+    if (++ sessionStats.earnedPoints === 10){
+      notification.update("You earned 10 points!");
+      sessionStats.earnedPoints = 0;
+    }
   }
   user.info.keyStrokes ++;
 }
@@ -1215,12 +1248,12 @@ function addCheckedBoxes(){
   if (++ sessionStats.checkBoxes === 5){
     sessionStats.checkBoxes = 0;
     user.addPoints(1);
-    ++ earnedPoints;
-    if (charGrid.theme != 2 && earnedPoints === 10){
-      notification.update("You earned 10 points!");
-      earnedPoints = 0;
-    }
     console.log("Points +1");
+    if (++ sessionStats.earnedPoints === 10){
+      notification.update("You earned 10 points!");
+      sessionStats.earnedPoints = 0;
+    }
   }
+
   user.info.checkBoxes ++;
 }

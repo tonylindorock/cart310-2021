@@ -14,7 +14,7 @@ class User {
       startYear: 2021,
       todayUsed: false,
       themesObtained: [],
-      gifts: []
+      gifts: [1, 2]
     };
   }
 
@@ -32,6 +32,7 @@ class User {
   saveData(){
     this.info.notes = [];
     this.info.magnets = [];
+    this.info.gifts = [];
     for(let i = 0; i < noteContainer.length; i++){
       let noteData = {};
       noteData['id'] = noteContainer[i].id;
@@ -54,6 +55,9 @@ class User {
                 markup.push([a, b, 1, noteContainer[i].characters[a][b].highlightColor]);
               }
             }
+            if (noteContainer[i].characters[a][b].button != null){
+              markup.push([a, b, 2, noteContainer[i].characters[a][b].char]);
+            }
           }
         }
         noteData['markup'] = markup;
@@ -74,6 +78,17 @@ class User {
       magnet['pos'] = [magnetContainer[i].posX, magnetContainer[i].posY];
       this.info.magnets.push(magnet);
     }
+    // gift shop
+    if (!giftShop.item0Sold){
+      this.info.gifts.push(giftShop.item0Id);
+    }else{
+      this.info.gifts.push(-1);
+    }
+    if (!giftShop.item1Sold){
+      this.info.gifts.push(giftShop.item1Id);
+    }else{
+      this.info.gifts.push(-1);
+    }
 
     storeItem('user', this.info);
     //console.log(this.info);
@@ -88,12 +103,6 @@ class User {
     var startDate = new Date(int(this.info.startYear), int(this.info.startMonth), int(this.info.startDay));
     let difference = (thisDate.getTime() - startDate.getTime())/ (1000 * 3600 * 24) + 1;
     return difference;
-  }
-
-  update(key, value) {
-    if (key in this.info) {
-      this.info[key] = value;
-    }
   }
 
   usePoints(amount){

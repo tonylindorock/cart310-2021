@@ -55,6 +55,7 @@ class Notification{
   endTimer(){
     clearInterval(this.timer);
     this.timer = null;
+    this.text = "";
   }
 
   checkForMouse(){
@@ -110,8 +111,8 @@ class Notification{
     fill(COLOR_BLUE);
     rect(0, 0, this.width * this.sizeChange, this.height * this.sizeChange, this.CORNER_RADIUS);
     fill(COLOR_WHITE);
-    textSize(24 * this.sizeChange);
-    textLeading(24 * this.sizeChange);
+    textSize(22 * this.sizeChange);
+    textLeading(22 * this.sizeChange);
     textFont(FONT_PLAYFUL);
     text(this.text, 0, 0, (this.width - MARGIN)* this.sizeChange, (this.height - MARGIN/2)* this.sizeChange);
     pop();
