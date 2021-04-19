@@ -125,7 +125,7 @@ let trashAnim = {
   deleteDone: false,
   radius: 0,
   speed: 0.35,
-  angleSpeed: 0.1,
+  angleSpeed: 0.15,
   angle: -90
 };
 let giftShop = {
@@ -963,7 +963,8 @@ function deleteNote(id) {
   cursor(ARROW);
   updateSelectedItem("", -1);
   removeFromArrayByItemId(noteContainer, id);
-  console.log("\"" + removeFromArrayByItemId(noteThumbnailContainer, id).title + "\" is deleted.");
+  let deleted = removeFromArrayByItemId(noteThumbnailContainer, id);
+  console.log(deleted.id + " \"" + deleted.title + "\" is deleted.");
   trashAnim.deleteDone = true;
   hoveredDraggables = [];
 
